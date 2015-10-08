@@ -19,9 +19,6 @@ class Multicolour_Server_Hapi {
     // Pass our config along to the server.
     this.__server.connection(this.request("host").get("config").get("api"))
 
-    // Get the Swagger library.
-    require("./lib/swagger-ui")(this.__server)
-
     // If something wants to extend the underlying
     // server, as per the multicolour plugin spec
     // it exposes a raw reply interface as a function.
@@ -146,6 +143,9 @@ class Multicolour_Server_Hapi {
   }
 
   start(callback) {
+    // Get the Swagger library.
+    require("./lib/swagger-ui")(this)
+    
     // Generate the routes.
     this.generate_routes()
 
