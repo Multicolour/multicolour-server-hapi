@@ -1,6 +1,10 @@
 "use strict"
 
+// Our function templates.
 const Functions = require("./lib/handlers")
+
+// To extend the blueprints.
+const extend = require("util")._extend
 
 class Multicolour_Server_Hapi {
   /**
@@ -38,13 +42,24 @@ class Multicolour_Server_Hapi {
     const waterline_joi = require("waterline-joi")
 
     // Get the models from the database instance.
-    const models = host.get("database").get("models")
+    const models = host.get("database").get("models").collections
 
-    let model_name, joi_conversion
+    // These are set in the loop over models.
+    /* eslint-disable */
+    let model_name, joi_conversion, reply_joi, original_blueprint
+    /* eslint-enable */
 
+    // Loop over the models to create the CRUD for each blueprint.
     for (model_name in models) {
+      // Thanks for pass by reference, JS. Thanks.
+      original_blueprint = JSON.parse(JSON.stringify(models[model_name]._attributes.blueprint))
+
       // Convert the Waterline collection to a Joi validator.
       joi_conversion = waterline_joi(models[model_name]._attributes.blueprint)
+
+      // We need to create a writable schema as well to
+      // include other properties like id, createdAt and updatedAt in responses.
+      reply_joi = waterline_joi(extend(models[model_name].definition, original_blueprint))
 
       // Create routes.
       this.__server.route([
@@ -58,11 +73,11 @@ class Multicolour_Server_Hapi {
             tags: ["api", model_name],
             validate: {
               params: Joi.object({
-                id: Joi.string().optional()
+                id: Joi.string().optional().description(`ID of the ${model_name} to get`)
               })
             },
             response: {
-              schema: Joi.array().items(joi_conversion)
+              schema: Joi.array().items(reply_joi)
                 .meta({
                   className: `Get ${model_name}`
                 })
@@ -71,7 +86,7 @@ class Multicolour_Server_Hapi {
         },
         {
           method: "POST",
-          path: `/${model_name}/{id?}`,
+          path: `/${model_name}`,
           config: {
             handler: Functions.POST.bind(models[model_name]),
             description: `Create a new "${model_name}"`,
@@ -81,7 +96,7 @@ class Multicolour_Server_Hapi {
               payload: joi_conversion
             },
             response: {
-              schema: joi_conversion.meta({
+              schema: reply_joi.meta({
                 className: `Create ${model_name}`
               })
             }
@@ -102,7 +117,7 @@ class Multicolour_Server_Hapi {
               })
             },
             response: {
-              schema: Joi.array().items(joi_conversion).meta({
+              schema: Joi.array().items(reply_joi).meta({
                 className: `Update ${model_name}`
               })
             }
@@ -145,7 +160,7 @@ class Multicolour_Server_Hapi {
   start(callback) {
     // Get the Swagger library.
     require("./lib/swagger-ui")(this)
-    
+
     // Generate the routes.
     this.generate_routes()
 
@@ -158,7 +173,8 @@ class Multicolour_Server_Hapi {
 
   stop(callback) {
     // Stop the server.
-    this.__server.stop(callback)
+    this.__server.stop()
+    callback()
     return this
   }
 }
