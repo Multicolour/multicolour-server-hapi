@@ -46,20 +46,27 @@ class Multicolour_Server_Hapi {
 
     // These are set in the loop over models.
     /* eslint-disable */
-    let model_name, joi_conversion, reply_joi, original_blueprint
+    let model_name, joi_conversion, reply_joi, original_blueprint, model
     /* eslint-enable */
 
     // Loop over the models to create the CRUD for each blueprint.
     for (model_name in models) {
+      // Make the below easier to read.
+      model = models[model_name]
+
       // Thanks for pass by reference, JS. Thanks.
-      original_blueprint = JSON.parse(JSON.stringify(models[model_name]._attributes.blueprint))
+      original_blueprint = JSON.parse(JSON.stringify(model._attributes.blueprint))
 
       // Convert the Waterline collection to a Joi validator.
-      joi_conversion = waterline_joi(models[model_name]._attributes.blueprint)
+      joi_conversion = waterline_joi(model._attributes.blueprint)
 
       // We need to create a writable schema as well to
       // include other properties like id, createdAt and updatedAt in responses.
-      reply_joi = waterline_joi(extend(models[model_name].definition, original_blueprint))
+      reply_joi = waterline_joi(extend({
+        id: model._attributes.id,
+        createdAt: model._attributes.createdAt,
+        updatedAt: model._attributes.updatedAt
+      }, original_blueprint))
 
       // Create routes.
       this.__server.route([
@@ -67,7 +74,7 @@ class Multicolour_Server_Hapi {
           method: "GET",
           path: `/${model_name}/{id?}`,
           config: {
-            handler: Functions.GET.bind(models[model_name]),
+            handler: Functions.GET.bind(model),
             description: `Get a paginated list of "${model_name}"`,
             notes: `Return a list of "${model_name}" in the database. If an ID is passed, return matching documents.`,
             tags: ["api", model_name],
@@ -88,7 +95,7 @@ class Multicolour_Server_Hapi {
           method: "POST",
           path: `/${model_name}`,
           config: {
-            handler: Functions.POST.bind(models[model_name]),
+            handler: Functions.POST.bind(model),
             description: `Create a new "${model_name}"`,
             notes: `Create a new ${model_name} with the posted data.`,
             tags: ["api", model_name],
@@ -106,7 +113,7 @@ class Multicolour_Server_Hapi {
           method: "PUT",
           path: `/${model_name}/{id}`,
           config: {
-            handler: Functions.PUT.bind(models[model_name]),
+            handler: Functions.PUT.bind(model),
             description: `Update a ${model_name}`,
             notes: `Update a ${model_name} with the posted data.`,
             tags: ["api", model_name],
@@ -127,7 +134,7 @@ class Multicolour_Server_Hapi {
           method: "DELETE",
           path: `/${model_name}/{id}`,
           config: {
-            handler: Functions.DELETE.bind(models[model_name]),
+            handler: Functions.DELETE.bind(model),
             description: `Delete a ${model_name}`,
             notes: `Delete a ${model_name} permanently.`,
             tags: ["api", model_name],
