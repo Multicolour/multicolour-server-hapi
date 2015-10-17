@@ -60,22 +60,26 @@ class Multicolour_Server_Hapi extends Map {
       // Get the handlers.
       const handlers = plugin.handlers()
 
-      // Register some auth routes.
-      this.__server.route([
-        {
+      // Create login/register endpoints with the config.
+      config.providers.forEach(auth_config => {
+        this.__server.route({
           method: ["GET", "POST"],
-          path: `/session`,
+          path: `/session/${auth_config.provider}`,
           config: {
             auth: {
-              strategy: config.provider || "token",
+              strategy: auth_config.provider,
               mode: "try"
             },
             handler: handlers.get("create"),
-            description: `Create a new session if credentials are valid.`,
-            notes: `Create a new session if credentials are valid.`,
-            tags: ["api", "auth"]
+            description: `Create a new session/user using "${auth_config.provider}"`,
+            notes: `Create a new session/user using "${auth_config.provider}"`,
+            tags: ["api", "auth", auth_config.provider]
           }
-        },
+        })
+      })
+
+      // Register some auth routes.
+      this.__server.route([
         {
           method: "DELETE",
           path: `/session`,
