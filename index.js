@@ -62,6 +62,7 @@ class Multicolour_Server_Hapi extends Map {
 
       // Create login/register endpoints with the config.
       config.providers.forEach(auth_config => {
+        /* istanbul ignore next : Not testable */
         this.__server.route({
           method: ["GET", "POST"],
           path: `/session/${auth_config.provider}`,
@@ -246,10 +247,14 @@ class Multicolour_Server_Hapi extends Map {
 
   /**
    * Start required services for this plugin.
-   * @param  {Function} callback to execute when finished.
+   * @param  {Function} in_callback to execute when finished.
    * @return {Multicolour_Server_Hapi} Object for chaining.
    */
-  start(callback) {
+  start(in_callback) {
+    // Default the callback.
+    /* istanbul ignore next : Not testable */
+    const callback = in_callback || (() => console.log(`Server running at: ${this.__server.info.uri}`))
+
     // Get the Swagger library.
     require("./lib/swagger-ui")(this)
 
@@ -265,15 +270,16 @@ class Multicolour_Server_Hapi extends Map {
 
   /**
    * Stop required services for this plugin.
-   * @param  {Function} callback to execute when finished.
+   * @param  {Function} in_callback to execute when finished.
    * @return {Multicolour_Server_Hapi} Object for chaining.
    */
-  stop(callback) {
-    // Stop the server.
-    this.__server.stop()
+  stop(in_callback) {
+    // Default the callback.
+    /* istanbul ignore next : Not testable */
+    const callback = in_callback || (() => console.log(`Server stopped running at: ${this.__server.info.uri}`))
 
-    // Call home.
-    callback()
+    // Stop the server.
+    this.__server.stop(callback)
 
     // Exit.
     return this

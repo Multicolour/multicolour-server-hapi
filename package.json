@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "tape tests/*.js | tap-spec",
-    "test-coverage": "istanbul cover tape tests/*.js --recursive --report lcov html | tap-spec",
+    "test-coverage": "istanbul cover tape tests/*.js --recursive --report lcov html -x handlers.js | tap-spec",
     "watch-tests": "nodemon -x \"clear && npm test\""
   },
   "repository": {
@@ -26,6 +26,9 @@
   "engineStrict": true,
   "engines": {
     "node": ">= 4.0.0"
+  },
+  "peerDependencies": {
+    "multicolour": "^0.1.0"
   },
   "dependencies": {
     "hapi": ">= 9.x.x < 11.0.0",

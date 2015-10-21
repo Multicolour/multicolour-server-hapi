@@ -8,9 +8,9 @@ module.exports = {
     },
     age: {
       required: true,
-      type: "number",
+      type: "integer",
       min: 0,
-      max: 9000 // OVER 9000!???!!!
+      max: 9000
     }
   }
 }
