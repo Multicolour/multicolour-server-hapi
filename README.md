@@ -1,7 +1,7 @@
 # multicolour-server-hapi
 
 [![Build Status](https://travis-ci.org/newworldcode/multicolour-server-hapi.svg)](https://travis-ci.org/newworldcode/multicolour-server-hapi)
-[![Coverage Status](https://coveralls.io/repos/newworldcode/multicolour-server-hapi/badge.svg?branch=dev&service=github)](https://coveralls.io/github/newworldcode/multicolour-server-hapi?branch=master)
+[![Coverage Status](https://coveralls.io/repos/newworldcode/multicolour-server-hapi/badge.svg?branch=master&service=github)](https://coveralls.io/github/newworldcode/multicolour-server-hapi?branch=master)
 [![Dependency Status](https://david-dm.org/newworldcode/multicolour-server-hapi.svg)](https://david-dm.org/newworldcode/multicolour-server-hapi)
 
 [HapiJS][hapi] Server generator for [Multicolour][multicolour]. Comes with Hapi
