@@ -288,12 +288,10 @@ class Multicolour_Server_Hapi extends Map {
 
 // Export the required config for Multicolour
 // to register.
-module.exports = host => {
-  return {
-    // It's a server generator, use that type.
-    type: host.get("types").SERVER_GENERATOR,
+module.exports = {
+  // It's a server generator, use that type.
+  type: require("multicolour/lib/consts").SERVER_GENERATOR,
 
-    // The generator is the class above.
-    generator: Multicolour_Server_Hapi
-  }
+  // The generator is the class above.
+  generator: Multicolour_Server_Hapi
 }
