@@ -3,9 +3,6 @@
 // Our function templates.
 const Functions = require("./lib/handlers")
 
-// To extend the blueprints.
-const extend = require("util")._extend
-
 class Multicolour_Server_Hapi extends Map {
   /**
    * Instantiated by Multicolour to create a HTTP server.
@@ -111,6 +108,9 @@ class Multicolour_Server_Hapi extends Map {
 
     // Get the models from the database instance.
     const models = host.get("database").get("models").collections
+
+    // To extend the blueprints.
+    const extend = require("util")._extend
 
     // These are set in the loop over models.
     /* eslint-disable */

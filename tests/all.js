@@ -28,7 +28,7 @@ tape("Plugin compatibility.", test => {
     content: test_content_path
   }).scan()
 
-  test.doesNotThrow(() => multicolour.use(Multicolour_Hapi_Server(multicolour)), "Multicolour Hapi Server is configured as plugin correctly.")
+  test.doesNotThrow(() => multicolour.use(Multicolour_Hapi_Server), "Multicolour Hapi Server is configured as plugin correctly.")
   test.end()
 })
 
@@ -41,7 +41,7 @@ tape("Plugin predictability/coverage.", test => {
   }).scan()
 
   // Use the server.
-  multicolour.use(Multicolour_Hapi_Server(multicolour))
+  multicolour.use(Multicolour_Hapi_Server)
 
   // Test for items we expect to exist/function once register.
   test.ok(multicolour.get("server"), "Multicolour Hapi Server is configured as plugin correctly and can `get`.")
