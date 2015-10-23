@@ -241,11 +241,9 @@ class Multicolour_Server_Hapi extends Map {
 
     switch (command) {
     case types.SERVER_BOOTUP:
-      console.log("Pre-boot warning.", data)
       break
 
     case types.SERVER_SHUTDOWN:
-      console.log("Pre-shutdown warning.", data)
       break
     }
     return this
