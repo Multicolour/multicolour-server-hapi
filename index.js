@@ -52,6 +52,7 @@ class Multicolour_Server_Hapi extends Map {
     switch(plugin_config.type) {
     case types.AUTH_PLUGIN:
       // Get the token for use in the routes.
+      this.reply("auth_plugin", plugin)
       this.set("auth_name", plugin.get("auth_name"))
 
       // Get the handlers.
@@ -93,7 +94,7 @@ class Multicolour_Server_Hapi extends Map {
       break
     }
 
-    return this
+    return host
   }
 
   generate_routes() {
@@ -124,10 +125,15 @@ class Multicolour_Server_Hapi extends Map {
 
       // Clone the blueprint so we don't accidentally modify it.
       // Thanks for pass by reference, JS. Thanks.
-      original_blueprint = JSON.parse(JSON.stringify(model._attributes.blueprint))
+      original_blueprint = JSON.parse(JSON.stringify(model._attributes))
+
+      // Remove attributes we didn't define.
+      delete original_blueprint.id
+      delete original_blueprint.createdAt
+      delete original_blueprint.updatedAt
 
       // Convert the Waterline collection to a Joi validator.
-      joi_conversion = waterline_joi(model._attributes.blueprint)
+      joi_conversion = waterline_joi(original_blueprint)
 
       // We need to create a writable schema as well to
       // include other properties like id, createdAt and updatedAt in responses.
