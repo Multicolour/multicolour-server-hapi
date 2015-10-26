@@ -37,7 +37,7 @@ tape("Plugin predictability/coverage.", test => {
   const multicolour = new Multicolour({
     content: test_content_path,
     auth: { providers: [] },
-    db: { adapters: { production: {} }, connections: { production: { adapter: "production" } } }
+    db: { adapters: { development: {} }, connections: { development: { adapter: "development" } } }
   }).scan()
 
   // Use the server.
