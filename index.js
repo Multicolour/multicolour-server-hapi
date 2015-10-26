@@ -108,7 +108,7 @@ class Multicolour_Server_Hapi extends Map {
     const waterline_joi = require("waterline-joi")
 
     // Get the models from the database instance.
-    const models = host.get("database").get("models").collections
+    const models = host.get("database").get("models")
 
     // To extend the blueprints.
     const extend = require("util")._extend
