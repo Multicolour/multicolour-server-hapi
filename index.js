@@ -3,6 +3,9 @@
 // Our function templates.
 const Functions = require("./lib/handlers")
 
+// Get Joi.
+const Joi = require("joi")
+
 class Multicolour_Server_Hapi extends Map {
   /**
    * Instantiated by Multicolour to create a HTTP server.
@@ -101,9 +104,6 @@ class Multicolour_Server_Hapi extends Map {
     // Get the host instance.
     const host = this.request("host")
 
-    // Get Joi.
-    const Joi = require("joi")
-
     // Get the waterline to joi converter.
     const waterline_joi = require("waterline-joi")
 
@@ -143,6 +143,46 @@ class Multicolour_Server_Hapi extends Map {
         updatedAt: model._attributes.updatedAt
       }, original_blueprint))
 
+      // Work out whether it's a file upload or not.
+      if (model.can_upload_file) {
+        // Set the host for the handler templates.
+        Functions.set_host(host)
+
+        // Add an upload endpoint.
+        this.__server.route({
+          method: "PUT",
+          path: `/${model_name}/{id}/upload`,
+          config: {
+            payload: {
+              allow: "multipart/form-data",
+              maxBytes: process.env.MAX_FILE_UPLOAD_BYTES || 209715200,
+              output: "file",
+              parse: true
+            },
+            auth: this.request("auth_name"),
+            handler: Functions.UPLOAD.bind(model),
+            description: `Upload a file to ${model_name}.`,
+            notes: `Upload media to ${model_name}.`,
+            tags: ["api", "file_upload", model_name],
+            validate: {
+              payload: Joi.object({
+                file: Joi.object().meta({
+                  swaggerType: "file"
+                })
+              }),
+              params: Joi.object({
+                id: Joi.string().required().description(`ID of the ${model_name} to upload to.`)
+              })
+            },
+            response: {
+              schema: Joi.array().items(reply_joi).meta({
+                className: `Upload media to ${model_name}`
+              })
+            }
+          }
+        })
+      }
+
       // Create routes.
       this.__server.route([
         {
@@ -156,7 +196,7 @@ class Multicolour_Server_Hapi extends Map {
             tags: ["api", model_name],
             validate: {
               params: Joi.object({
-                id: Joi.string().optional().description(`ID of the ${model_name} to get`)
+                id: Joi.string().optional().description(`ID of ${model_name} to get`)
               })
             },
             response: {
@@ -173,8 +213,8 @@ class Multicolour_Server_Hapi extends Map {
           config: {
             auth: this.request("auth_name"),
             handler: Functions.POST.bind(model),
-            description: `Create a new "${model_name}".`,
-            notes: `Create a new ${model_name} with the posted data.`,
+            description: `Create new "${model_name}".`,
+            notes: `Create new ${model_name} with the posted data.`,
             tags: ["api", model_name],
             validate: {
               payload: joi_conversion
@@ -192,8 +232,8 @@ class Multicolour_Server_Hapi extends Map {
           config: {
             auth: this.request("auth_name"),
             handler: Functions.PUT.bind(model),
-            description: `Update a ${model_name}.`,
-            notes: `Update a ${model_name} with the posted data.`,
+            description: `Update ${model_name}.`,
+            notes: `Update ${model_name} with the posted data.`,
             tags: ["api", model_name],
             validate: {
               payload: joi_conversion,
@@ -214,8 +254,8 @@ class Multicolour_Server_Hapi extends Map {
           config: {
             auth: this.request("auth_name"),
             handler: Functions.DELETE.bind(model),
-            description: `Delete a ${model_name}.`,
-            notes: `Delete a ${model_name} permanently.`,
+            description: `Delete ${model_name}.`,
+            notes: `Delete ${model_name} permanently.`,
             tags: ["api", model_name],
             validate: {
               params: Joi.object({
