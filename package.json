@@ -30,6 +30,7 @@
     "multicolour": "^0.1.0"
   },
   "dependencies": {
+    "boom": "^3.0.0",
     "hapi": "^11.0.2",
     "hapi-swaggered": "^2.4.0",
     "hapi-swaggered-ui": "^2.1.0",
