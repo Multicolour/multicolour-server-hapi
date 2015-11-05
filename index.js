@@ -41,6 +41,11 @@ class Multicolour_Server_Hapi extends Map {
     return this
   }
 
+  /**
+   * Servers support plugins for things like authentication.
+   * @param  {Object} plugin_config in the plugins main exports.
+   * @return {multicolour} host of the server.
+   */
   use(plugin_config) {
     // Get our types.
     const host = this.request("host")
