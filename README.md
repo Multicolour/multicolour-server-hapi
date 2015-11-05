@@ -29,6 +29,12 @@ const my_service = require("multicolour")
 my_service.start()
 ```
 
+### Security
+
+This plugin enforces the usage of [CSRF tokens](https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet). You can get a token for your session by running a `GET` request on `/csrf`.
+
+Your requests will *all* 403 without the `x-csrf-token` header set to the value returned by the `/csrf` endpoint.
+
 ### Plugins
 
 This server has support for plugins, such as the [OAuth plugin][oauth plugin] via
@@ -48,10 +54,12 @@ class My_Auth_Plugin extends Map {
   // Required methods on ALL plugins.
   constructor() { super() }
   register() { return this }
+  create_session(request, reply) {}
+  destroy_session(request, reply) {}
   handlers() {
     return new Map([
-      ["create", () => this],
-      ["destroy", () => this]
+      ["create", () => this.create_session.bind(this)],
+      ["destroy", () => this.destroy_session.bind(this)]
     ])
   }
 }
@@ -65,10 +73,10 @@ module.exports = {
 
 In the above class definition, we can see `My_Auth_Plugin` has some interesting things:  
 
-3 methods, `constructor`, `register` and `handlers`.  
+5 methods, `constructor`, `register`, `handlers`, `create_session` and `destroy_session`.  
 `extends Map`, `super()`.
 
-The three methods are the signature of the plugin, this shouldn't be confused with the registration signature (the `module.exports = ...`). The server plugin should call these functions to register and handle behaviour when and where it is required.
+The five methods are the signature of the plugin, this shouldn't be confused with the registration signature (the `module.exports = ...`). The server plugin should call these functions to register and handle behaviour when and where it is required.
 
 The plugin `extends Map` as we need to store information on the class at runtime without
 some other complicated interface wrapping the plugin. `super()` is required as per the ES6 specification.
