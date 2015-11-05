@@ -18,21 +18,25 @@ class Multicolour_Server_Hapi extends Map {
     const hapi = require("hapi")
 
     // Configure the server with some basic security.
-    this.__server = new hapi.Server({
-      connections: { routes: { security: true } },
-      debug: { request: ["error"] }
-    })
+    this.__server = new hapi.Server(this.request("host").get("config").get("api_server"))
 
     // Pass our config along to the server.
-    this.__server.connection(this.request("host").get("config").get("api"))
+    this.__server.connection(this.request("host").get("config").get("api_connections"))
 
+    this
     // If something wants to extend the underlying
     // server, as per the multicolour plugin spec
     // it exposes a raw reply interface as a function.
-    this.reply("raw", () => this.__server)
+      .reply("raw", () => this.__server)
 
-    // Set some defaults.
-    this.reply("auth_name", false)
+      // Make the templates available.
+      .reply("handler_templates", () => Functions)
+
+      // Set some defaults.
+      .reply("auth_name", false)
+
+    // Register the CSRF plugin.
+    require("./lib/csrf-register")(this.__server)
 
     return this
   }
@@ -113,9 +117,14 @@ class Multicolour_Server_Hapi extends Map {
     // To extend the blueprints.
     const extend = require("util")._extend
 
+    // The headers required to make a request.
+    const headers = Joi.object({
+      "x-csrf-token": Joi.string().required()
+    }).options({ allowUnknown: true })
+
     // These are set in the loop over models.
     /* eslint-disable */
-    let model_name, joi_conversion, reply_joi, original_blueprint, model
+    let model_name, joi_conversion, reply_joi, original_blueprint, model, auth
     /* eslint-enable */
 
     // Loop over the models to create the CRUD for each blueprint.
@@ -159,7 +168,6 @@ class Multicolour_Server_Hapi extends Map {
               output: "file",
               parse: true
             },
-            auth: this.request("auth_name"),
             handler: Functions.UPLOAD.bind(model),
             description: `Upload a file to ${model_name}.`,
             notes: `Upload media to ${model_name}.`,
@@ -172,7 +180,8 @@ class Multicolour_Server_Hapi extends Map {
               }),
               params: Joi.object({
                 id: Joi.string().required().description(`ID of the ${model_name} to upload to.`)
-              })
+              }),
+              headers
             },
             response: {
               schema: Joi.array().items(reply_joi).meta({
@@ -183,13 +192,12 @@ class Multicolour_Server_Hapi extends Map {
         })
       }
 
-      // Create routes.
-      this.__server.route([
+      // Create routes if we didn't specifically say not to.
+      !model.NO_AUTO_GEN_ROUTES && this.__server.route([
         {
           method: "GET",
           path: `/${model_name}/{id?}`,
           config: {
-            auth: this.request("auth_name"),
             handler: Functions.GET.bind(model),
             description: `Get a paginated list of "${model_name}".`,
             notes: `Return a list of "${model_name}" in the database. If an ID is passed, return matching documents.`,
@@ -197,7 +205,8 @@ class Multicolour_Server_Hapi extends Map {
             validate: {
               params: Joi.object({
                 id: Joi.string().optional().description(`ID of ${model_name} to get`)
-              })
+              }),
+              headers
             },
             response: {
               schema: Joi.array().items(reply_joi)
@@ -211,13 +220,13 @@ class Multicolour_Server_Hapi extends Map {
           method: "POST",
           path: `/${model_name}`,
           config: {
-            auth: this.request("auth_name"),
             handler: Functions.POST.bind(model),
             description: `Create new "${model_name}".`,
             notes: `Create new ${model_name} with the posted data.`,
             tags: ["api", model_name],
             validate: {
-              payload: joi_conversion
+              payload: joi_conversion,
+              headers
             },
             response: {
               schema: reply_joi.meta({
@@ -230,7 +239,6 @@ class Multicolour_Server_Hapi extends Map {
           method: "PUT",
           path: `/${model_name}/{id}`,
           config: {
-            auth: this.request("auth_name"),
             handler: Functions.PUT.bind(model),
             description: `Update ${model_name}.`,
             notes: `Update ${model_name} with the posted data.`,
@@ -239,7 +247,8 @@ class Multicolour_Server_Hapi extends Map {
               payload: joi_conversion,
               params: Joi.object({
                 id: Joi.string().required().description(`ID of the ${model_name} to update`)
-              })
+              }),
+              headers
             },
             response: {
               schema: Joi.array().items(reply_joi).meta({
@@ -252,7 +261,6 @@ class Multicolour_Server_Hapi extends Map {
           method: "DELETE",
           path: `/${model_name}/{id}`,
           config: {
-            auth: this.request("auth_name"),
             handler: Functions.DELETE.bind(model),
             description: `Delete ${model_name}.`,
             notes: `Delete ${model_name} permanently.`,
@@ -260,11 +268,17 @@ class Multicolour_Server_Hapi extends Map {
             validate: {
               params: Joi.object({
                 id: Joi.string().required().description(`ID of the ${model_name} to delete`)
-              })
+              }),
+              headers
             }
           }
         }
       ])
+
+      // If there are custom routes to load, fire the function with the server.
+      if (model.custom_routes) {
+        model.custom_routes.bind(model)(host)
+      }
     }
   }
 
