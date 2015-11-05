@@ -310,8 +310,10 @@ class Multicolour_Server_Hapi extends Map {
    */
   start(in_callback) {
     // Default the callback.
+    /* eslint-disable */
     /* istanbul ignore next : Not testable */
     const callback = in_callback || (() => console.log(`Server running at: ${this.__server.info.uri}`))
+    /* eslint-enable */
 
     // Get the Swagger library.
     require("./lib/swagger-ui")(this)
@@ -333,8 +335,10 @@ class Multicolour_Server_Hapi extends Map {
    */
   stop(in_callback) {
     // Default the callback.
+    /* eslint-disable */
     /* istanbul ignore next : Not testable */
     const callback = in_callback || (() => console.log(`Server stopped running at: ${this.__server.info.uri}`))
+    /* eslint-enable */
 
     // Stop the server.
     this.__server.stop(callback)
