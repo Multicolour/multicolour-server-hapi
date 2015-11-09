@@ -65,7 +65,7 @@ class Multicolour_Server_Hapi extends Map {
     case types.AUTH_PLUGIN:
       // Get the token for use in the routes.
       this.reply("auth_plugin", plugin)
-      this.set("auth_name", plugin.get("auth_name"))
+      this.set("auth_names", plugin.get("auth_names"))
 
       // Get the handlers.
       const handlers = plugin.handlers()
@@ -95,7 +95,9 @@ class Multicolour_Server_Hapi extends Map {
           method: "DELETE",
           path: `/session`,
           config: {
-            auth: this.request("auth_name"),
+            auth: {
+              strategies: this.get("auth_names")
+            },
             handler: handlers.get("destroy"),
             description: `Delete a session.`,
             notes: `Delete a session permanently.`,
@@ -109,6 +111,10 @@ class Multicolour_Server_Hapi extends Map {
     return host
   }
 
+  /**
+   * Generate the routes to be registered by this server.
+   * @return {Multicolour_Server_Hapi} Object for chaining.
+   */
   generate_routes() {
     // Get the host instance.
     const host = this.request("host")
@@ -214,6 +220,7 @@ class Multicolour_Server_Hapi extends Map {
           method: "GET",
           path: `/${model_name}/{id?}`,
           config: {
+            auth,
             handler: Functions.GET.bind(model),
             description: `Get a paginated list of "${model_name}".`,
             notes: `Return a list of "${model_name}" in the database. If an ID is passed, return matching documents.`,
@@ -236,6 +243,7 @@ class Multicolour_Server_Hapi extends Map {
           method: "POST",
           path: `/${model_name}`,
           config: {
+            auth,
             handler: Functions.POST.bind(model),
             description: `Create new "${model_name}".`,
             notes: `Create new ${model_name} with the posted data.`,
@@ -255,6 +263,7 @@ class Multicolour_Server_Hapi extends Map {
           method: "PUT",
           path: `/${model_name}/{id}`,
           config: {
+            auth,
             handler: Functions.PUT.bind(model),
             description: `Update ${model_name}.`,
             notes: `Update ${model_name} with the posted data.`,
@@ -277,6 +286,7 @@ class Multicolour_Server_Hapi extends Map {
           method: "DELETE",
           path: `/${model_name}/{id}`,
           config: {
+            auth,
             handler: Functions.DELETE.bind(model),
             description: `Delete ${model_name}.`,
             notes: `Delete ${model_name} permanently.`,
@@ -296,6 +306,8 @@ class Multicolour_Server_Hapi extends Map {
         model.custom_routes.bind(model)(host)
       }
     }
+
+    return this
   }
 
   /**
