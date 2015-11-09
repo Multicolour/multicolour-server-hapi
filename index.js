@@ -127,19 +127,33 @@ class Multicolour_Server_Hapi extends Map {
       "x-csrf-token": Joi.string().required()
     }).options({ allowUnknown: true })
 
-    // These are set in the loop over models.
-    /* eslint-disable */
-    let model_name, joi_conversion, reply_joi, original_blueprint, model, auth
-    /* eslint-enable */
+    // Get the auth strategy
+    const auth = this.request("auth_name")
 
     // Loop over the models to create the CRUD for each blueprint.
-    for (model_name in models) {
+    for (const model_name in models) {
       // Make the below easier to read.
-      model = models[model_name]
+      const model = models[model_name]
 
       // Clone the blueprint so we don't accidentally modify it.
       // Thanks for pass by reference, JS. Thanks.
-      original_blueprint = JSON.parse(JSON.stringify(model._attributes))
+      const original_blueprint = JSON.parse(JSON.stringify(model._attributes))
+
+      // Create the reply object.
+      const reply_object = extend({
+        id: model._attributes.id,
+        createdAt: model._attributes.createdAt,
+        updatedAt: model._attributes.updatedAt
+      }, original_blueprint)
+
+      // Loop over the attributes to see if we have
+      // any relationship type fields to add validation for.
+      for (const attribute in original_blueprint) {
+        if (original_blueprint[attribute].hasOwnProperty("model")) {
+          original_blueprint[attribute] = "string"
+          reply_object[attribute] = "object"
+        }
+      }
 
       // Remove attributes we didn't define.
       delete original_blueprint.id
@@ -147,15 +161,11 @@ class Multicolour_Server_Hapi extends Map {
       delete original_blueprint.updatedAt
 
       // Convert the Waterline collection to a Joi validator.
-      joi_conversion = waterline_joi(original_blueprint)
+      const joi_conversion = waterline_joi(original_blueprint)
 
       // We need to create a writable schema as well to
       // include other properties like id, createdAt and updatedAt in responses.
-      reply_joi = waterline_joi(extend({
-        id: model._attributes.id,
-        createdAt: model._attributes.createdAt,
-        updatedAt: model._attributes.updatedAt
-      }, original_blueprint))
+      const reply_joi = waterline_joi(reply_object)
 
       // Work out whether it's a file upload or not.
       if (model.can_upload_file) {
@@ -167,6 +177,7 @@ class Multicolour_Server_Hapi extends Map {
           method: "PUT",
           path: `/${model_name}/{id}/upload`,
           config: {
+            auth,
             payload: {
               allow: "multipart/form-data",
               maxBytes: process.env.MAX_FILE_UPLOAD_BYTES || 209715200,
