@@ -134,7 +134,7 @@ class Multicolour_Server_Hapi extends Map {
     }).options({ allowUnknown: true })
 
     // Get the auth strategy
-    const auth = this.request("auth_name")
+    const auth = this.request("auth_names")
 
     // Loop over the models to create the CRUD for each blueprint.
     for (const model_name in models) {
