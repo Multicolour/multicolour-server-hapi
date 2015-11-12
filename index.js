@@ -186,7 +186,7 @@ class Multicolour_Server_Hapi extends Map {
             notes: `Create new ${model_name} with the posted data.`,
             tags: ["api", model_name],
             validate: {
-              payload: payload,
+              payload,
               headers
             },
             response: {
@@ -206,7 +206,7 @@ class Multicolour_Server_Hapi extends Map {
             notes: `Update ${model_name} with the posted data.`,
             tags: ["api", model_name],
             validate: {
-              payload: payload,
+              payload,
               params: Joi.object({
                 id: Joi.string().required().description(`ID of the ${model_name} to update`)
               }),
