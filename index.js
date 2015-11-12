@@ -29,11 +29,14 @@ class Multicolour_Server_Hapi extends Map {
     // it exposes a raw reply interface as a function.
       .reply("raw", () => this.__server)
 
-      // Make the templates available.
-      .reply("handler_templates", () => Functions)
-
       // Set some defaults.
       .reply("auth_name", false)
+      .reply("decorator", "json")
+
+    // Default decorator.
+    this.__server.decorate("reply", "json", function(reply) {
+      return this.response(reply)
+    })
 
     // Register the CSRF plugin.
     require("./lib/csrf-register")(this.__server)
@@ -108,7 +111,7 @@ class Multicolour_Server_Hapi extends Map {
       break
     }
 
-    return host
+    return this
   }
 
   /**
@@ -118,6 +121,9 @@ class Multicolour_Server_Hapi extends Map {
   generate_routes() {
     // Get the host instance.
     const host = this.request("host")
+
+    // Set the host for the handler templates.
+    Functions.set_host(host)
 
     // Get the waterline to joi converter.
     const waterline_joi = require("waterline-joi")
@@ -175,9 +181,6 @@ class Multicolour_Server_Hapi extends Map {
 
       // Work out whether it's a file upload or not.
       if (model.can_upload_file) {
-        // Set the host for the handler templates.
-        Functions.set_host(host)
-
         // Add an upload endpoint.
         this.__server.route({
           method: "PUT",
@@ -205,11 +208,11 @@ class Multicolour_Server_Hapi extends Map {
               }),
               headers
             },
-            response: {
-              schema: Joi.array().items(reply_joi).meta({
-                className: `Upload media to ${model_name}`
-              })
-            }
+            // response: {
+            //   schema: Joi.array().items(reply_joi).meta({
+            //     className: `Upload media to ${model_name}`
+            //   })
+            // }
           }
         })
       }
@@ -231,12 +234,12 @@ class Multicolour_Server_Hapi extends Map {
               }),
               headers
             },
-            response: {
-              schema: Joi.array().items(reply_joi)
-                .meta({
-                  className: `Get ${model_name}`
-                })
-            }
+            // response: {
+            //   schema: Joi.array().items(reply_joi)
+            //     .meta({
+            //       className: `Get ${model_name}`
+            //     })
+            // }
           }
         },
         {
@@ -252,11 +255,11 @@ class Multicolour_Server_Hapi extends Map {
               payload: joi_conversion,
               headers
             },
-            response: {
-              schema: reply_joi.meta({
-                className: `Create ${model_name}`
-              })
-            }
+            // response: {
+            //   schema: reply_joi.meta({
+            //     className: `Create ${model_name}`
+            //   })
+            // }
           }
         },
         {
@@ -275,11 +278,11 @@ class Multicolour_Server_Hapi extends Map {
               }),
               headers
             },
-            response: {
-              schema: Joi.array().items(reply_joi).meta({
-                className: `Update ${model_name}`
-              })
-            }
+            // response: {
+            //   schema: Joi.array().items(reply_joi).meta({
+            //     className: `Update ${model_name}`
+            //   })
+            // }
           }
         },
         {
@@ -348,6 +351,11 @@ class Multicolour_Server_Hapi extends Map {
 
     // Generate the routes.
     this.generate_routes()
+
+    // Do we have a decorator?
+    if (Object.keys(this.__server._replier._decorations).length === 0) {
+
+    }
 
     // Start the server.
     this.__server.start(callback)
