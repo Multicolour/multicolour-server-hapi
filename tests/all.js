@@ -46,14 +46,10 @@ tape("Plugin predictability/coverage.", test => {
   // Test for items we expect to exist/function once register.
   test.ok(multicolour.get("server"), "Multicolour Hapi Server is configured as plugin correctly and can `get`.")
   test.ok(multicolour.get("server").request("raw"), "Can get raw server from plugin")
-  test.ok(multicolour.get("server").use({
-    plugin: Test_Plugin,
-    type: multicolour.get("types").AUTH_PLUGIN
-  }), "Can get plugin host from plugin")
+  test.ok(multicolour.get("server").use(Test_Plugin), "Can get plugin host from plugin")
 
   // This is just for coverage.
   test.doesNotThrow(() => multicolour.start(multicolour.stop.bind(multicolour)), "Starts.")
-  test.doesNotThrow(() => multicolour.stop(), "Stops")
 
   test.end()
 })

@@ -26,19 +26,18 @@
   "engines": {
     "node": ">= 4.0.0"
   },
-  "peerDependencies": {
-    "multicolour": "^0.1.0"
-  },
   "dependencies": {
+    "@newworldcode/talkie": "^1.0.7",
     "boom": "^3.0.0",
+    "crumb": "^5.0.0",
     "hapi": "^11.0.2",
     "hapi-swaggered": "^2.4.0",
     "hapi-swaggered-ui": "^2.1.0",
     "inert": "^3.2.0",
     "joi": "^6.9.0",
+    "multicolour": "^0.1.0",
     "vision": "^3.0.0",
-    "waterline-joi": "^1.0.8",
-    "crumb": "^5.0.0"
+    "waterline-joi": "^1.0.8"
   },
   "devDependencies": {
     "eslint": "^1.7.3",

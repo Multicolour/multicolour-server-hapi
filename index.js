@@ -2,6 +2,7 @@
 
 // Our function templates.
 const Functions = require("./lib/handlers")
+const Default_validator = require("./lib/validation")
 
 // Get Joi.
 const Joi = require("joi")
@@ -39,6 +40,9 @@ class Multicolour_Server_Hapi extends Map {
       return this.response(reply)
     })
 
+    // Use the default validator until otherwise set.
+    this.use(Default_validator)
+
     return this
   }
 
@@ -47,69 +51,30 @@ class Multicolour_Server_Hapi extends Map {
    * @param  {Object} plugin_config in the plugins main exports.
    * @return {multicolour} host of the server.
    */
-  use(plugin_config) {
+  use(Plugin) {
     // Get our types.
     const host = this.request("host")
-    const types = host.get("types")
-    const config = host.get("config").get("auth")
 
     // Instantiate the plugin.
-    const plugin = new plugin_config.plugin(this)
+    const plugin = new Plugin(this)
 
     // Give the plugin the Talkie interface.
     host.extend(plugin)
 
     // Create any added routes by the plugin.
-    plugin.register()
-
-    switch(plugin_config.type) {
-    case types.AUTH_PLUGIN:
-      // Get the token for use in the routes.
-      this.reply("auth_plugin", plugin)
-      this.set("auth_names", plugin.get("auth_names"))
-
-      // Get the handlers.
-      const handlers = plugin.handlers()
-
-      // Create login/register endpoints with the config.
-      config.providers.forEach(auth_config => {
-        /* istanbul ignore next : Not testable */
-        this.__server.route({
-          method: ["GET", "POST"],
-          path: `/session/${auth_config.provider}`,
-          config: {
-            auth: {
-              strategy: auth_config.provider,
-              mode: "try"
-            },
-            handler: handlers.get("create"),
-            description: `Create a new session/user using "${auth_config.provider}"`,
-            notes: `Create a new session/user using "${auth_config.provider}"`,
-            tags: ["api", "auth", auth_config.provider]
-          }
-        })
-      })
-
-      // Register some auth routes.
-      this.__server.route([
-        {
-          method: "DELETE",
-          path: `/session`,
-          config: {
-            auth: {
-              strategies: this.get("auth_names")
-            },
-            handler: handlers.get("destroy"),
-            description: `Delete a session.`,
-            notes: `Delete a session permanently.`,
-            tags: ["api", "auth"]
-          }
-        }
-      ])
-      break
-    }
+    plugin.register(this)
 
     return this
+  }
+
+  /**
+   * Register names, properties or anything helpful
+   * against the base multicolour instance.
+   * @param  {Multicolour} multicolour instance this plugin is registering to.
+   * @return {void}
+   */
+  register(multicolour) {
+    multicolour.set("server", this)
   }
 
   /**
@@ -123,14 +88,8 @@ class Multicolour_Server_Hapi extends Map {
     // Set the host for the handler templates.
     Functions.set_host(host)
 
-    // Get the waterline to joi converter.
-    const waterline_joi = require("waterline-joi")
-
     // Get the models from the database instance.
     const models = host.get("database").get("models")
-
-    // To extend the blueprints.
-    const extend = require("util")._extend
 
     // Get the auth strategy
     const auth = this.request("auth_names")
@@ -152,43 +111,18 @@ class Multicolour_Server_Hapi extends Map {
       // Make the below easier to read.
       const model = models[model_name]
 
-      // Clone the blueprint so we don't accidentally modify it.
-      // Thanks for pass by reference, JS. Thanks.
-      const original_blueprint = JSON.parse(JSON.stringify(model._attributes))
-
-      // Create the reply object.
-      const reply_object = extend({
-        id: model._attributes.id,
-        createdAt: model._attributes.createdAt,
-        updatedAt: model._attributes.updatedAt
-      }, original_blueprint)
-
-      // Loop over the attributes to see if we have
-      // any relationship type fields to add validation for.
-      for (const attribute in original_blueprint) {
-        if (original_blueprint[attribute].hasOwnProperty("model")) {
-          original_blueprint[attribute] = "string"
-          reply_object[attribute] = "object"
-        }
-      }
-
-      // Remove attributes we didn't define.
-      delete original_blueprint.id
-      delete original_blueprint.createdAt
-      delete original_blueprint.updatedAt
-
       // Convert the Waterline collection to a Joi validator.
-      const joi_conversion = waterline_joi(original_blueprint)
+      const payload = this.get("validator").request("payload_schema", model)
 
       // We need to create a writable schema as well to
       // include other properties like id, createdAt and updatedAt in responses.
-      const reply_joi = waterline_joi(reply_object)
+      const response_payload = this.get("validator").request("response_schema", model)
 
       // Work out whether it's a file upload or not.
       if (model.can_upload_file) {
         // Add an upload endpoint.
         this.__server.route({
-          method: "PUT",
+          method: "PATCH",
           path: `/${model_name}/{id}/upload`,
           config: {
             auth,
@@ -213,11 +147,11 @@ class Multicolour_Server_Hapi extends Map {
               }),
               headers
             },
-            // response: {
-            //   schema: Joi.array().items(reply_joi).meta({
-            //     className: `Upload media to ${model_name}`
-            //   })
-            // }
+            response: {
+              schema: Joi.array().items(response_payload).meta({
+                className: `Upload media to ${model_name}`
+              })
+            }
           }
         })
       }
@@ -234,12 +168,12 @@ class Multicolour_Server_Hapi extends Map {
             notes: `Return a list of "${model_name}" in the database. If an ID is passed, return matching documents.`,
             tags: ["api", model_name],
             validate: { headers },
-            // response: {
-            //   schema: Joi.array().items(reply_joi)
-            //     .meta({
-            //       className: `Get ${model_name}`
-            //     })
-            // }
+            response: {
+              schema: Joi.array().items(response_payload)
+                .meta({
+                  className: `Get ${model_name}`
+                })
+            }
           }
         },
         {
@@ -252,37 +186,37 @@ class Multicolour_Server_Hapi extends Map {
             notes: `Create new ${model_name} with the posted data.`,
             tags: ["api", model_name],
             validate: {
-              payload: joi_conversion,
+              payload: payload,
               headers
             },
-            // response: {
-            //   schema: reply_joi.meta({
-            //     className: `Create ${model_name}`
-            //   })
-            // }
+            response: {
+              schema: response_payload.meta({
+                className: `Create ${model_name}`
+              })
+            }
           }
         },
         {
-          method: "PUT",
+          method: "PATCH",
           path: `/${model_name}/{id}`,
           config: {
             auth,
-            handler: Functions.PUT.bind(model),
+            handler: Functions.PATCH.bind(model),
             description: `Update ${model_name}.`,
             notes: `Update ${model_name} with the posted data.`,
             tags: ["api", model_name],
             validate: {
-              payload: joi_conversion,
+              payload: payload,
               params: Joi.object({
                 id: Joi.string().required().description(`ID of the ${model_name} to update`)
               }),
               headers
             },
-            // response: {
-            //   schema: Joi.array().items(reply_joi).meta({
-            //     className: `Update ${model_name}`
-            //   })
-            // }
+            response: {
+              schema: Joi.array().items(response_payload).meta({
+                className: `Update ${model_name}`
+              })
+            }
           }
         },
         {
@@ -379,12 +313,6 @@ class Multicolour_Server_Hapi extends Map {
   }
 }
 
-// Export the required config for Multicolour
+// Export Multicolour_Server_Hapi for Multicolour
 // to register.
-module.exports = {
-  // It's a server generator, use that type.
-  type: require("multicolour/lib/consts").SERVER_GENERATOR,
-
-  // The generator is the class above.
-  generator: Multicolour_Server_Hapi
-}
+module.exports = Multicolour_Server_Hapi
