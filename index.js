@@ -233,12 +233,7 @@ class Multicolour_Server_Hapi extends Map {
             description: `Get a paginated list of "${model_name}".`,
             notes: `Return a list of "${model_name}" in the database. If an ID is passed, return matching documents.`,
             tags: ["api", model_name],
-            validate: {
-              params: Joi.object({
-                id: Joi.string().optional().description(`ID of ${model_name} to get`)
-              }),
-              headers
-            },
+            validate: { headers },
             // response: {
             //   schema: Joi.array().items(reply_joi)
             //     .meta({
