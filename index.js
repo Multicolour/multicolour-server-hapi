@@ -226,7 +226,7 @@ class Multicolour_Server_Hapi extends Map {
       !model.NO_AUTO_GEN_ROUTES && this.__server.route([
         {
           method: "GET",
-          path: `/${model_name}/{id?}`,
+          path: `/${model_name}`,
           config: {
             auth,
             handler: Functions.GET.bind(model),
