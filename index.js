@@ -32,6 +32,7 @@ class Multicolour_Server_Hapi extends Map {
       // Set some defaults.
       .reply("auth_name", false)
       .reply("decorator", "json")
+      .reply("csrf_enabled", true)
 
     // Default decorator.
     this.__server.decorate("reply", "json", function(reply) {
@@ -140,7 +141,7 @@ class Multicolour_Server_Hapi extends Map {
     const auth = this.request("auth_names")
 
     // Register the CSRF plugin.
-    if (!this.request("csrf_enabled")) {
+    if (this.request("csrf_enabled")) {
       require("./lib/csrf-register")(this.__server)
     }
 
