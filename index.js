@@ -132,17 +132,19 @@ class Multicolour_Server_Hapi extends Map {
     // To extend the blueprints.
     const extend = require("util")._extend
 
-    // The headers required to make a request.
-    const headers = Joi.object({
-      "x-csrf-token": Joi.string().required()
-    }).options({ allowUnknown: true })
-
     // Get the auth strategy
     const auth = this.request("auth_names")
+
+    // The headers required to make a request.
+    let headers
 
     // Register the CSRF plugin.
     if (this.request("csrf_enabled")) {
       require("./lib/csrf-register")(this.__server)
+
+      headers = Joi.object({
+        "x-csrf-token": Joi.string().required()
+      }).options({ allowUnknown: true })
     }
 
     // Loop over the models to create the CRUD for each blueprint.
