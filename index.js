@@ -11,7 +11,7 @@ class Multicolour_Server_Hapi extends Map {
    * Instantiated by Multicolour to create a HTTP server.
    * @return {Multicolour_Server_Hapi} For immediate object return.
    */
-  constructor() {
+  constructor(options) {
     super()
 
     // Get Hapi.
@@ -39,7 +39,9 @@ class Multicolour_Server_Hapi extends Map {
     })
 
     // Register the CSRF plugin.
-    require("./lib/csrf-register")(this.__server)
+    if (options && options.csrf !== false) {
+      require("./lib/csrf-register")(this.__server)
+    }
 
     return this
   }
@@ -351,11 +353,6 @@ class Multicolour_Server_Hapi extends Map {
 
     // Generate the routes.
     this.generate_routes()
-
-    // Do we have a decorator?
-    if (Object.keys(this.__server._replier._decorations).length === 0) {
-
-    }
 
     // Start the server.
     this.__server.start(callback)
