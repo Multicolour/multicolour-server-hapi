@@ -11,7 +11,7 @@ class Multicolour_Server_Hapi extends Map {
    * Instantiated by Multicolour to create a HTTP server.
    * @return {Multicolour_Server_Hapi} For immediate object return.
    */
-  constructor(options) {
+  constructor() {
     super()
 
     // Get Hapi.
@@ -37,11 +37,6 @@ class Multicolour_Server_Hapi extends Map {
     this.__server.decorate("reply", "json", function(reply) {
       return this.response(reply)
     })
-
-    // Register the CSRF plugin.
-    if (options && options.csrf !== false) {
-      require("./lib/csrf-register")(this.__server)
-    }
 
     return this
   }
@@ -143,6 +138,11 @@ class Multicolour_Server_Hapi extends Map {
 
     // Get the auth strategy
     const auth = this.request("auth_names")
+
+    // Register the CSRF plugin.
+    if (!this.request("csrf_enabled")) {
+      require("./lib/csrf-register")(this.__server)
+    }
 
     // Loop over the models to create the CRUD for each blueprint.
     for (const model_name in models) {
