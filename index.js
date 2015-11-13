@@ -2,7 +2,6 @@
 
 // Our function templates.
 const Functions = require("./lib/handlers")
-const Default_validator = require("./lib/validation")
 
 // Get Joi.
 const Joi = require("joi")
@@ -41,7 +40,9 @@ class Multicolour_Server_Hapi extends Map {
     })
 
     // Use the default validator until otherwise set.
-    this.use(Default_validator)
+    this
+      .use(require("./lib/headers"))
+      .use(require("./lib/validation"))
 
     return this
   }
@@ -82,6 +83,11 @@ class Multicolour_Server_Hapi extends Map {
    * @return {Multicolour_Server_Hapi} Object for chaining.
    */
   generate_routes() {
+    // Register the CSRF plugin.
+    if (this.request("csrf_enabled")) {
+      this.use(require("./lib/csrf"))
+    }
+
     // Get the host instance.
     const host = this.request("host")
 
@@ -95,16 +101,8 @@ class Multicolour_Server_Hapi extends Map {
     const auth = this.request("auth_names")
 
     // The headers required to make a request.
-    let headers
-
-    // Register the CSRF plugin.
-    if (this.request("csrf_enabled")) {
-      require("./lib/csrf-register")(this.__server)
-
-      headers = Joi.object({
-        "x-csrf-token": Joi.string().required()
-      }).options({ allowUnknown: true })
-    }
+    const headers = Joi.object(this.request("header_validator").get())
+      .options({ allowUnknown: true })
 
     // Loop over the models to create the CRUD for each blueprint.
     for (const model_name in models) {
@@ -137,6 +135,7 @@ class Multicolour_Server_Hapi extends Map {
             notes: `Upload media to ${model_name}.`,
             tags: ["api", "file_upload", model_name],
             validate: {
+              headers,
               payload: Joi.object({
                 file: Joi.object().meta({
                   swaggerType: "file"
@@ -144,11 +143,10 @@ class Multicolour_Server_Hapi extends Map {
               }),
               params: Joi.object({
                 id: Joi.string().required().description(`ID of the ${model_name} to upload to.`)
-              }),
-              headers
+              })
             },
             response: {
-              schema: Joi.array().items(response_payload).meta({
+              schema: response_payload.meta({
                 className: `Upload media to ${model_name}`
               })
             }
@@ -169,10 +167,9 @@ class Multicolour_Server_Hapi extends Map {
             tags: ["api", model_name],
             validate: { headers },
             response: {
-              schema: Joi.array().items(response_payload)
-                .meta({
-                  className: `Get ${model_name}`
-                })
+              schema: response_payload.meta({
+                className: `Get ${model_name}`
+              })
             }
           }
         },
@@ -185,10 +182,7 @@ class Multicolour_Server_Hapi extends Map {
             description: `Create new "${model_name}".`,
             notes: `Create new ${model_name} with the posted data.`,
             tags: ["api", model_name],
-            validate: {
-              payload,
-              headers
-            },
+            validate: { payload, headers },
             response: {
               schema: response_payload.meta({
                 className: `Create ${model_name}`
@@ -207,13 +201,13 @@ class Multicolour_Server_Hapi extends Map {
             tags: ["api", model_name],
             validate: {
               payload,
+              headers,
               params: Joi.object({
                 id: Joi.string().required().description(`ID of the ${model_name} to update`)
-              }),
-              headers
+              })
             },
             response: {
-              schema: Joi.array().items(response_payload).meta({
+              schema: response_payload.meta({
                 className: `Update ${model_name}`
               })
             }
@@ -229,10 +223,10 @@ class Multicolour_Server_Hapi extends Map {
             notes: `Delete ${model_name} permanently.`,
             tags: ["api", model_name],
             validate: {
+              headers,
               params: Joi.object({
                 id: Joi.string().required().description(`ID of the ${model_name} to delete`)
-              }),
-              headers
+              })
             }
           }
         }
