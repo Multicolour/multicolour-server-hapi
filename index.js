@@ -30,7 +30,7 @@ class Multicolour_Server_Hapi extends Map {
       .reply("raw", () => this.__server)
 
       // Set some defaults.
-      .reply("auth_name", false)
+      .reply("auth_names", false)
       .reply("decorator", "json")
       .reply("csrf_enabled", true)
 
