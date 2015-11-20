@@ -120,7 +120,7 @@ class Multicolour_Server_Hapi extends Map {
       if (model.can_upload_file) {
         // Add an upload endpoint.
         this.__server.route({
-          method: "PATCH",
+          method: "PUT",
           path: `/${model_name}/{id}/upload`,
           config: {
             auth,
@@ -131,7 +131,7 @@ class Multicolour_Server_Hapi extends Map {
               parse: true
             },
             handler: Functions.UPLOAD.bind(model),
-            description: `Upload a file to ${model_name}.`,
+            description: `Upload a file to ${model_name}. Replaces any existing media for this document.`,
             notes: `Upload media to ${model_name}.`,
             tags: ["api", "file_upload", model_name],
             validate: {
