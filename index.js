@@ -274,8 +274,11 @@ class Multicolour_Server_Hapi extends Map {
     const callback = in_callback || (() => console.log(`Server running at: ${this.__server.info.uri}`))
     /* eslint-enable */
 
-    // Get the Swagger library.
-    require("./lib/swagger-ui")(this)
+    // If it's not a production environment,
+    // get the Swagger library and it's interface.
+    if (process.env.NODE_ENV !== "production") {
+      require("./lib/swagger-ui")(this)
+    }
 
     // Generate the routes.
     this.generate_routes()
