@@ -296,7 +296,13 @@ class Multicolour_Server_Hapi extends Map {
     // Default the callback.
     /* eslint-disable */
     /* istanbul ignore next : Not testable */
-    const callback = in_callback || (() => console.log(`Server stopped running at: ${this.__server.info.uri}`))
+    const callback = in_callback || (() => {
+      // Say good night.
+      console.log(`Server stopped running at: ${this.__server.info.uri}`)
+
+      // End the show.
+      process.exit(0)
+    })
     /* eslint-enable */
 
     // Stop the server.
