@@ -242,27 +242,6 @@ class Multicolour_Server_Hapi extends Map {
   }
 
   /**
-   * The plugin may receive messages from it's host,
-   * it will receive them here for us to do what we will.
-   * @param  {String} type of message.
-   * @param  {Any} command to this plugin.
-   * @param  {Any} data passed with the command.
-   * @return {Multicolour_Server_Hapi} Object for chaining.
-   */
-  warn(type, command, data) {
-    const types = require("multicolour/lib/consts")
-
-    switch (command) {
-    case types.SERVER_BOOTUP:
-      break
-
-    case types.SERVER_SHUTDOWN:
-      break
-    }
-    return this
-  }
-
-  /**
    * Start required services for this plugin.
    * @param  {Function} in_callback to execute when finished.
    * @return {Multicolour_Server_Hapi} Object for chaining.
