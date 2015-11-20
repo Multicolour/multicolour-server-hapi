@@ -53,7 +53,7 @@ class Multicolour_Server_Hapi extends Map {
    * @return {multicolour} host of the server.
    */
   use(Plugin) {
-    // Get our types.
+    // Get our glorious host.
     const host = this.request("host")
 
     // Instantiate the plugin.
@@ -62,7 +62,7 @@ class Multicolour_Server_Hapi extends Map {
     // Give the plugin the Talkie interface.
     host.extend(plugin)
 
-    // Create any added routes by the plugin.
+    // Make sure the plugin registers any behaviour.
     plugin.register(this)
 
     return this
@@ -83,7 +83,7 @@ class Multicolour_Server_Hapi extends Map {
    * @return {Multicolour_Server_Hapi} Object for chaining.
    */
   generate_routes() {
-    // Register the CSRF plugin.
+    // Register the CSRF plugin if enabled.
     if (this.request("csrf_enabled")) {
       this.use(require("./lib/csrf"))
     }
@@ -247,7 +247,8 @@ class Multicolour_Server_Hapi extends Map {
    * @return {Multicolour_Server_Hapi} Object for chaining.
    */
   start(in_callback) {
-    // Default the callback.
+    // Default the callback, horrible for all
+    // code quality processors, pragma the crap out of it..
     /* eslint-disable */
     /* istanbul ignore next : Not testable */
     const callback = in_callback || (() => console.log(`Server running at: ${this.__server.info.uri}`))
