@@ -276,20 +276,21 @@ class Multicolour_Server_Hapi extends Map {
    * @return {Multicolour_Server_Hapi} Object for chaining.
    */
   stop(in_callback) {
-    // Default the callback.
-    /* eslint-disable */
-    /* istanbul ignore next : Not testable */
-    const callback = in_callback || (() => {
+    // Stop the server.
+    this.__server.stop(() => {
       // Say good night.
-      console.log(`Server stopped running at: ${this.__server.info.uri}`)
+      if (!in_callback) {
+        /* eslint-disable */
+        console.log(`Server stopped running at: ${this.__server.info.uri}`)
+        /* eslint-enable */
+      }
+      else {
+        in_callback()
+      }
 
       // End the show.
       process.exit(0)
     })
-    /* eslint-enable */
-
-    // Stop the server.
-    this.__server.stop(callback)
 
     // Exit.
     return this
