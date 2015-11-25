@@ -30,9 +30,13 @@ class Multicolour_Server_Hapi extends Map {
       .reply("raw", () => this.__server)
 
       // Set some defaults.
-      .reply("auth_names", false)
       .reply("decorator", "json")
       .reply("csrf_enabled", true)
+
+    // Check there's an auth config available.
+    if (typeof this.request("auth_config") === "undefined") {
+      this.reply("auth_config", false)
+    }
 
     // Default decorator.
     this.__server.decorate("reply", "json", function(reply) {
@@ -98,11 +102,10 @@ class Multicolour_Server_Hapi extends Map {
     const models = host.get("database").get("models")
 
     // Get the auth strategy
-    const auth = this.request("auth_names")
+    const auth = this.request("auth_config")
 
-    // The headers required to make a request.
-    const headers = Joi.object(this.request("header_validator").get())
-      .options({ allowUnknown: true })
+    // Get the headers required to make a request.
+    const headers = Joi.object(this.request("header_validator").get()).options({ allowUnknown: true })
 
     // Loop over the models to create the CRUD for each blueprint.
     for (const model_name in models) {
