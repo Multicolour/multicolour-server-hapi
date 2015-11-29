@@ -1,7 +1,10 @@
 "use strict"
 
-// Our function templates.
-const Functions = require("./lib/handlers")
+// get our verbs.
+const Verb_Delete = require("./lib/verbs/delete")
+const Verb_Get = require("./lib/verbs/get")
+const Verb_Post = require("./lib/verbs/post")
+const Verb_Patch = require("./lib/verbs/patch")
 
 // Get Joi.
 const Joi = require("joi")
@@ -95,14 +98,11 @@ class Multicolour_Server_Hapi extends Map {
     // Get the host instance.
     const host = this.request("host")
 
-    // Set the host for the handler templates.
-    Functions.set_host(host)
-
     // Get the models from the database instance.
     const models = host.get("database").get("models")
 
     // Get the auth strategy
-    const auth = this.request("auth_config")
+    const auth_name = this.request("auth_config")
 
     // Get the headers required to make a request.
     const headers = Joi.object(this.request("header_validator").get()).options({ allowUnknown: true })
@@ -157,82 +157,15 @@ class Multicolour_Server_Hapi extends Map {
         })
       }
 
-      // Create routes if we didn't specifically say not to.
-      !model.NO_AUTO_GEN_ROUTES && this.__server.route([
-        {
-          method: "GET",
-          path: `/${model_name}/{id?}`,
-          config: {
-            auth,
-            handler: Functions.GET.bind(model),
-            description: `Get a paginated list of "${model_name}".`,
-            notes: `Return a list of "${model_name}" in the database. If an ID is passed, return matching documents.`,
-            tags: ["api", model_name],
-            validate: { headers },
-            response: {
-              schema: response_payload.meta({
-                className: `Get ${model_name}`
-              })
-            }
-          }
-        },
-        {
-          method: "POST",
-          path: `/${model_name}`,
-          config: {
-            auth,
-            handler: Functions.POST.bind(model),
-            description: `Create new "${model_name}".`,
-            notes: `Create new ${model_name} with the posted data.`,
-            tags: ["api", model_name],
-            validate: { payload, headers },
-            response: {
-              schema: response_payload.meta({
-                className: `Create ${model_name}`
-              })
-            }
-          }
-        },
-        {
-          method: "PATCH",
-          path: `/${model_name}/{id}`,
-          config: {
-            auth,
-            handler: Functions.PATCH.bind(model),
-            description: `Update ${model_name}.`,
-            notes: `Update ${model_name} with the posted data.`,
-            tags: ["api", model_name],
-            validate: {
-              payload,
-              headers,
-              params: Joi.object({
-                id: Joi.string().required().description(`ID of the ${model_name} to update`)
-              })
-            },
-            response: {
-              schema: response_payload.meta({
-                className: `Update ${model_name}`
-              })
-            }
-          }
-        },
-        {
-          method: "DELETE",
-          path: `/${model_name}/{id}`,
-          config: {
-            auth,
-            handler: Functions.DELETE.bind(model),
-            description: `Delete ${model_name}.`,
-            notes: `Delete ${model_name} permanently.`,
-            tags: ["api", model_name],
-            validate: {
-              headers,
-              params: Joi.object({
-                id: Joi.string().required().description(`ID of the ${model_name} to delete`)
-              })
-            }
-          }
-        }
+      // Create routes if we didn't specifically say not to
+      // and this model isn't a junction table.
+      !model.NO_AUTO_GEN_ROUTES &&
+      !model.meta.junctionTable &&
+      this.__server.route([
+        new Verb_Get(model, headers, auth_name).get_route(null, response_payload, headers),
+        new Verb_Post(model, headers, auth_name).get_route(payload, response_payload, headers),
+        new Verb_Patch(model, headers, auth_name).get_route(payload, response_payload, headers),
+        new Verb_Delete(model, headers, auth_name).get_route(null, response_payload, headers)
       ])
 
       // If there are custom routes to load, fire the function with the server.
