@@ -1,9 +1,13 @@
 "use strict"
 
-// get our verbs.
+// Get the handlers so we can set the host.
+const handlers = require("./lib/handlers")
+
+// Get our verbs.
 const Verb_Delete = require("./lib/verbs/delete")
 const Verb_Get = require("./lib/verbs/get")
 const Verb_Post = require("./lib/verbs/post")
+const Verb_Put = require("./lib/verbs/put")
 const Verb_Patch = require("./lib/verbs/patch")
 
 // Get Joi.
@@ -97,6 +101,7 @@ class Multicolour_Server_Hapi extends Map {
 
     // Get the host instance.
     const host = this.request("host")
+    handlers.set_host(host)
 
     // Get the models from the database instance.
     const models = host.get("database").get("models")
@@ -165,7 +170,8 @@ class Multicolour_Server_Hapi extends Map {
         new Verb_Get(model, headers, auth_name).get_route(null, response_payload, headers),
         new Verb_Post(model, headers, auth_name).get_route(payload, response_payload, headers),
         new Verb_Patch(model, headers, auth_name).get_route(payload, response_payload, headers),
-        new Verb_Delete(model, headers, auth_name).get_route(null, response_payload, headers)
+        new Verb_Delete(model, headers, auth_name).get_route(null, response_payload, headers),
+        new Verb_Put(model, headers, auth_name).get_route(payload, response_payload, headers)
       ])
 
       // If there are custom routes to load, fire the function with the server.
