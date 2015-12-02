@@ -4,6 +4,7 @@
 const handlers = require("./lib/handlers")
 
 // Get our verbs.
+const Upload_route = require("./lib/upload-route")
 const Verb_Delete = require("./lib/verbs/delete")
 const Verb_Get = require("./lib/verbs/get")
 const Verb_Post = require("./lib/verbs/post")
@@ -124,55 +125,26 @@ class Multicolour_Server_Hapi extends Map {
       // include other properties like id, createdAt and updatedAt in responses.
       const response_payload = this.get("validator").request("response_schema", model)
 
-      // Work out whether it's a file upload or not.
-      if (model.can_upload_file) {
-        // Add an upload endpoint.
-        this.__server.route({
-          method: "PUT",
-          path: `/${model_name}/{id}/upload`,
-          config: {
-            auth,
-            payload: {
-              allow: "multipart/form-data",
-              maxBytes: process.env.MAX_FILE_UPLOAD_BYTES || 209715200,
-              output: "file",
-              parse: true
-            },
-            handler: Functions.UPLOAD.bind(model),
-            description: `Upload a file to ${model_name}. Replaces any existing media for this document.`,
-            notes: `Upload media to ${model_name}.`,
-            tags: ["api", "file_upload", model_name],
-            validate: {
-              headers,
-              payload: Joi.object({
-                file: Joi.object().meta({
-                  swaggerType: "file"
-                })
-              }),
-              params: Joi.object({
-                id: Joi.string().required().description(`ID of the ${model_name} to upload to.`)
-              })
-            },
-            response: {
-              schema: response_payload.meta({
-                className: `Upload media to ${model_name}`
-              })
-            }
-          }
-        })
-      }
-
       // Create routes if we didn't specifically say not to
       // and this model isn't a junction table.
-      !model.NO_AUTO_GEN_ROUTES &&
-      !model.meta.junctionTable &&
-      this.__server.route([
-        new Verb_Get(model, headers, auth_name).get_route(null, response_payload, headers),
-        new Verb_Post(model, headers, auth_name).get_route(payload, response_payload, headers),
-        new Verb_Patch(model, headers, auth_name).get_route(payload, response_payload, headers),
-        new Verb_Delete(model, headers, auth_name).get_route(null, response_payload, headers),
-        new Verb_Put(model, headers, auth_name).get_route(payload, response_payload, headers)
-      ])
+      if (!model.NO_AUTO_GEN_ROUTES && !model.meta.junctionTable) {
+        // Add the standard routes.
+        this.__server.route([
+          new Verb_Get(model, headers, auth_name).get_route(null, response_payload, headers),
+          new Verb_Post(model, headers, auth_name).get_route(payload, response_payload, headers),
+          new Verb_Patch(model, headers, auth_name).get_route(payload, response_payload, headers),
+          new Verb_Delete(model, headers, auth_name).get_route(null, Joi.object(), headers),
+          new Verb_Put(model, headers, auth_name).get_route(payload, response_payload, headers)
+        ])
+
+        // If this model specifies it can upload files,
+        // add the route required.
+        if (model.can_upload_file) {
+          this.__server.route([
+            new Upload_route(model, headers, auth_name).get_route(payload, response_payload, headers)
+          ])
+        }
+      }
 
       // If there are custom routes to load, fire the function with the server.
       if (model.custom_routes) {
