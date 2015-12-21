@@ -32,9 +32,6 @@ class Multicolour_Server_Hapi extends Map {
     this.__server.connection(this.request("host").get("config").get("api_connections"))
 
     this
-    // If something wants to extend the underlying
-    // server, as per the multicolour plugin spec
-    // it exposes a raw reply interface as a function.
       .reply("raw", () => this.__server)
 
       // Set some defaults.
@@ -120,6 +117,9 @@ class Multicolour_Server_Hapi extends Map {
 
       // Convert the Waterline collection to a Joi validator.
       const payload = this.get("validator").request("payload_schema", model)
+
+      // Get/add the timeout setting to the payload.
+      payload.timeout = host.get("config").get("settings").timeout || 1e4
 
       // We need to create a writable schema as well to
       // include other properties like id, createdAt and updatedAt in responses.
