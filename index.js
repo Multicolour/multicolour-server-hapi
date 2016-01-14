@@ -148,7 +148,7 @@ class Multicolour_Server_Hapi extends Map {
 
       // If there are custom routes to load, fire the function with the server.
       if (model.custom_routes) {
-        model.custom_routes.bind(model)(this.__server, host)
+        model.custom_routes.call(model, this.__server, host)
       }
     }
 
