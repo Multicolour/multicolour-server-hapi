@@ -44,7 +44,7 @@ class Multicolour_Server_Hapi extends Map {
     }
 
     // Default decorator.
-    this.__server.decorate("reply", "json", function(reply) {
+    this.__server.decorate("reply", "application/json", function(reply) {
       return this.response(reply)
     })
 
