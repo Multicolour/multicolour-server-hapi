@@ -1,7 +1,7 @@
 "use strict"
 
 module.exports = {
-  blueprint: {
+  attributes: {
     name: {
       required: true,
       type: "string"
@@ -12,5 +12,8 @@ module.exports = {
       min: 0,
       max: 9000
     }
-  }
+  },
+
+  can_upload_file: true,
+  custom_routes: () => {}
 }
