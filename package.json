@@ -31,7 +31,7 @@
     "boom": "^3.0.0",
     "crumb": "^6.0.0",
     "hapi": "^13.0.0",
-    "hapi-swagger": "^4.2.1",
+    "hapi-swagger": "git+https://github.com/glennjones/hapi-swagger.git",
     "inert": "^3.2.0",
     "joi": "^8.0.1",
     "multicolour": "^0.2.9",
