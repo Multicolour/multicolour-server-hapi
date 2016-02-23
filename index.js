@@ -108,7 +108,7 @@ class Multicolour_Server_Hapi extends Map {
     const auth_name = this.request("auth_config")
 
     // Get the headers required to make a request.
-    const headers = Joi.object(this.request("header_validator").get()).options({ allowUnknown: true })
+    const headers = Joi.object(this.request("header_validator").get()).unknown(true)
 
     // Loop over the models to create the CRUD for each blueprint.
     for (const model_name in models) {
