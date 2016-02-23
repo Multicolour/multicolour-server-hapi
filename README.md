@@ -1,8 +1,8 @@
 # multicolour-server-hapi
 
-[![Build Status](https://travis-ci.org/newworldcode/multicolour-server-hapi.svg)](https://travis-ci.org/newworldcode/multicolour-server-hapi)
-[![Coverage Status](https://coveralls.io/repos/newworldcode/multicolour-server-hapi/badge.svg?branch=master&service=github)](https://coveralls.io/github/newworldcode/multicolour-server-hapi?branch=master)
-[![Dependency Status](https://david-dm.org/newworldcode/multicolour-server-hapi.svg)](https://david-dm.org/newworldcode/multicolour-server-hapi)
+[![Build Status](https://travis-ci.org/Multicolour/multicolour-server-hapi.svg)](https://travis-ci.org/Multicolour/multicolour-server-hapi)
+[![Coverage Status](https://coveralls.io/repos/Multicolour/multicolour-server-hapi/badge.svg?branch=master&service=github)](https://coveralls.io/github/Multicolour/multicolour-server-hapi?branch=master)
+[![Dependency Status](https://david-dm.org/Multicolour/multicolour-server-hapi.svg)](https://david-dm.org/Multicolour/multicolour-server-hapi)
 
 [HapiJS][hapi] Server generator for [Multicolour][multicolour]. Comes with Hapi
 Swaggered for automatic endpoint documentation via swaggered-ui.
@@ -31,9 +31,11 @@ my_service.start()
 
 ### Security
 
-This plugin enforces the usage of [CSRF tokens](https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet). You can get a token for your session by running a `GET` request on `/csrf`.
+This plugin supports [CSRF tokens](https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet). You can get a token for your session by running a `GET` request on `/csrf`.
 
 Your requests will *all* 403 without the `x-csrf-token` header set to the value returned by the `/csrf` endpoint.
+
+Enable or disable CSRF by adding `my_service.reply("csrf_enabled", Boolean)` to your `app.js`.
 
 ### Plugins
 
@@ -89,6 +91,6 @@ Access to the raw HapiJS server is possible via `server.request("raw")` which wi
 return the instance of HapiJS behind the plugin.
 
 [hapi]: hapijs.com
-[multicolour]: https://github.com/newworldcode/multicolour
-[oauth plugin]: https://github.com/newworldcode/multicolour-auth-oauth
-[usedocs]: https://github.com/newworldcode/multicolour/wiki/Multicolour#use
+[multicolour]: https://github.com/Multicolour/multicolour
+[oauth plugin]: https://github.com/Multicolour/multicolour-auth-oauth
+[usedocs]: https://github.com/Multicolour/multicolour/wiki/Multicolour#use
