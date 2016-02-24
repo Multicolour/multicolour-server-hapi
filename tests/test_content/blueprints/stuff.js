@@ -13,14 +13,12 @@ module.exports = {
       max: 9000
     },
 
-    user: {
-      model: "multicolour_user"
+    users: {
+      collection: "multicolour_user"
     }
   },
 
-  roles: {
-    get: ["user"]
-  },
+  roles: ["admin"],
 
   can_upload_file: true,
   custom_routes: () => {}

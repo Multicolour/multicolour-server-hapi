@@ -8,11 +8,6 @@ module.exports = {
   api_connections: {
     port: 1811,
     host: "localhost",
-    routes: {
-      cors: {
-        origin: [ "http://localhost:1811" ]
-      }
-    },
     router: { stripTrailingSlash: true }
   },
 
