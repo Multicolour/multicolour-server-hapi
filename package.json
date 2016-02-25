@@ -41,7 +41,7 @@
   "devDependencies": {
     "eslint": "^2.1.0",
     "istanbul": "^0.4.0",
-    "multicolour-seed": "0.0.5",
+    "multicolour-seed": "0.0.6",
     "sails-memory": "^0.10.6",
     "tap-spec": "^4.1.0",
     "tape": "^4.2.0"
