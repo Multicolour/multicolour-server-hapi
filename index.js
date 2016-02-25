@@ -35,8 +35,7 @@ class Multicolour_Server_Hapi extends Map {
       .reply("raw", () => this.__server)
 
       // Set some defaults.
-      .reply("decorator", "json")
-      .reply("csrf_enabled", true)
+      .reply("csrf_enabled", false)
 
     // Check there's an auth config available.
     if (typeof this.request("auth_config") === "undefined") {
@@ -150,6 +149,9 @@ class Multicolour_Server_Hapi extends Map {
       if (model.custom_routes) {
         model.custom_routes.call(model, this.__server, host)
       }
+
+      // Trigger an event.
+      host.trigger("routes_generated")
     }
 
     return this
@@ -161,6 +163,12 @@ class Multicolour_Server_Hapi extends Map {
    * @return {Multicolour_Server_Hapi} Object for chaining.
    */
   start(in_callback) {
+    // Get the host.
+    const multicolour = this.request("host")
+
+    // Tell any listeners the server is starting.
+    multicolour.trigger("server_starting")
+
     // Default the callback, horrible for all
     // code quality processors, pragma the crap out of it..
     /* eslint-disable */
@@ -173,12 +181,23 @@ class Multicolour_Server_Hapi extends Map {
     if (process.env.NODE_ENV !== "production") {
       require("./lib/swagger-ui")(this)
     }
+    else {
+      /* eslint-disable */
+      console.log("PROD: Not setting up /docs in production.")
+      /* eslint-enable */
+    }
 
     // Generate the routes.
     this.generate_routes()
 
     // Start the server.
-    this.__server.start(callback)
+    this.__server.start(() => {
+      // Tell any listeners the server has started.
+      multicolour.trigger("server_started")
+
+      // Run the callback
+      callback()
+    })
 
     // Exit.
     return this
@@ -192,15 +211,12 @@ class Multicolour_Server_Hapi extends Map {
   stop(in_callback) {
     // Stop the server.
     this.__server.stop(() => {
-      // Say good night.
-      if (!in_callback) {
-        /* eslint-disable */
-        console.log(`Server stopped running at: ${this.__server.info.uri}`)
-        /* eslint-enable */
-      }
-      else {
-        in_callback()
-      }
+      /* eslint-disable */
+      console.log(`Server stopped running at: ${this.__server.info.uri}`)
+      /* eslint-enable */
+
+      // Run the callback if it exists.
+      in_callback && in_callback()
 
       // End the show.
       process.exit(0)
