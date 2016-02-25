@@ -196,7 +196,7 @@ class Multicolour_Server_Hapi extends Map {
       multicolour.trigger("server_started")
 
       // Run the callback
-      callback()
+      callback && callback()
     })
 
     // Exit.
@@ -208,7 +208,12 @@ class Multicolour_Server_Hapi extends Map {
    * @param  {Function} in_callback to execute when finished.
    * @return {Multicolour_Server_Hapi} Object for chaining.
    */
-  stop(in_callback) {
+  stop(callback) {
+    const multicolour = this.request("host")
+
+    // Tell any listeners the server is stopping.
+    multicolour.trigger("server_stopping")
+
     // Stop the server.
     this.__server.stop(() => {
       /* eslint-disable */
@@ -216,7 +221,10 @@ class Multicolour_Server_Hapi extends Map {
       /* eslint-enable */
 
       // Run the callback if it exists.
-      in_callback && in_callback()
+      callback && callback()
+
+      // Tell any listeners the server has stopped.
+      multicolour.trigger("server_stopped")
 
       // End the show.
       process.exit(0)
@@ -227,6 +235,5 @@ class Multicolour_Server_Hapi extends Map {
   }
 }
 
-// Export Multicolour_Server_Hapi for Multicolour
-// to register.
+// Export Multicolour_Server_Hapi for Multicolour to register.
 module.exports = Multicolour_Server_Hapi
