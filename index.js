@@ -42,11 +42,6 @@ class Multicolour_Server_Hapi extends Map {
       this.reply("auth_config", false)
     }
 
-    // Default decorator.
-    this.__server.decorate("reply", "application/json", function(reply) {
-      return this.response(reply)
-    })
-
     // Use the default validator until otherwise set.
     this
       .use(require("./lib/headers"))
@@ -84,6 +79,11 @@ class Multicolour_Server_Hapi extends Map {
    */
   register(multicolour) {
     multicolour.set("server", this)
+
+    // Default decorator is JSON.
+    this.__server.decorate("reply", "application/json", function(payload) {
+      return this.response(payload)
+    })
   }
 
   /**
