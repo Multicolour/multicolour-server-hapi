@@ -149,10 +149,10 @@ class Multicolour_Server_Hapi extends Map {
       if (model.custom_routes) {
         model.custom_routes.call(model, this.__server, host)
       }
-
-      // Trigger an event.
-      host.trigger("routes_generated")
     }
+
+    // Trigger an event.
+    host.trigger("routes_generated")
 
     return this
   }
