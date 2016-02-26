@@ -36,6 +36,7 @@ class Multicolour_Server_Hapi extends Map {
 
       // Set some defaults.
       .reply("csrf_enabled", false)
+      .set("validators", [])
 
     // Check there's an auth config available.
     if (typeof this.request("auth_config") === "undefined") {
@@ -114,13 +115,6 @@ class Multicolour_Server_Hapi extends Map {
       // Make the below easier to read.
       const model = models[model_name]
 
-      // Convert the Waterline collection to a Joi validator.
-      const payload = this.get("validator").request("payload_schema", model)
-
-      // We need to create a writable schema as well to
-      // include other properties like id, createdAt and updatedAt in responses.
-      const response_payload = this.get("validator").request("response_schema", model)
-
       // Get the configured request timeout.
       const request_timeout = host.get("config").get("settings").timeout
 
@@ -129,18 +123,18 @@ class Multicolour_Server_Hapi extends Map {
       if (!model.NO_AUTO_GEN_ROUTES && !model.meta.junctionTable) {
         // Add the standard routes.
         this.__server.route([
-          new Verb_Get(model, headers, auth_name, request_timeout).get_route(null, response_payload, headers),
-          new Verb_Post(model, headers, auth_name, request_timeout).get_route(payload, response_payload, headers),
-          new Verb_Patch(model, headers, auth_name, request_timeout).get_route(payload, response_payload, headers),
-          new Verb_Delete(model, headers, auth_name, request_timeout).get_route(null, Joi.object(), headers),
-          new Verb_Put(model, headers, auth_name, request_timeout).get_route(payload, response_payload, headers)
+          new Verb_Get(model, headers, auth_name, request_timeout).get_route(this.get("validators"), headers),
+          new Verb_Post(model, headers, auth_name, request_timeout).get_route(this.get("validators"), headers),
+          new Verb_Patch(model, headers, auth_name, request_timeout).get_route(this.get("validators"), headers),
+          new Verb_Delete(model, headers, auth_name, request_timeout).get_route(this.get("validators"), headers),
+          new Verb_Put(model, headers, auth_name, request_timeout).get_route(this.get("validators"), headers)
         ])
 
         // If this model specifies it can upload files,
         // add the route required.
         if (model.can_upload_file) {
           this.__server.route([
-            new Upload_route(model, headers, auth_name, request_timeout).get_route(payload, response_payload, headers)
+            new Upload_route(model, headers, auth_name, request_timeout).get_route(this.get("validators"), headers)
           ])
         }
       }
