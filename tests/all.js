@@ -49,12 +49,12 @@ multicolour.get("database").start(() => {
   })
 
   tape("Plugin predictability/coverage.", test => {
-    test.plan(4)
     // Test for items we expect to exist/function once register.
     test.ok(multicolour.get("server"), "Multicolour Hapi Server is configured as plugin correctly and can `get`.")
     test.ok(multicolour.get("server").request("raw"), "Can get raw server from plugin")
     test.doesNotThrow(() => multicolour.get("server").use(Test_Plugin), "Can register plugins without error")
     test.doesNotThrow(() => server.start(server.stop.bind(server)), "Server starts and stops without error.")
+    test.end()
   })
 
   tape("Header validator can set and get headers.", test => {
