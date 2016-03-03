@@ -110,6 +110,8 @@ class Multicolour_Server_Hapi extends Map {
     // Get the headers required to make a request.
     const headers = Joi.object(this.request("header_validator").get()).unknown(true)
 
+    const validators = this.get("validators")
+
     // Loop over the models to create the CRUD for each blueprint.
     for (const model_name in models) {
       // Make the below easier to read.
@@ -123,11 +125,11 @@ class Multicolour_Server_Hapi extends Map {
       if (!model.NO_AUTO_GEN_ROUTES && !model.meta.junctionTable) {
         // Add the standard routes.
         this.__server.route([
-          new Verb_Get(model, headers, auth_name, request_timeout).get_route(this.get("validators"), headers),
-          new Verb_Post(model, headers, auth_name, request_timeout).get_route(this.get("validators"), headers),
-          new Verb_Patch(model, headers, auth_name, request_timeout).get_route(this.get("validators"), headers),
-          new Verb_Delete(model, headers, auth_name, request_timeout).get_route(this.get("validators"), headers),
-          new Verb_Put(model, headers, auth_name, request_timeout).get_route(this.get("validators"), headers)
+          new Verb_Get(model, headers, auth_name, request_timeout).get_route(validators, headers),
+          new Verb_Post(model, headers, auth_name, request_timeout).get_route(validators, headers),
+          new Verb_Patch(model, headers, auth_name, request_timeout).get_route(validators, headers),
+          new Verb_Delete(model, headers, auth_name, request_timeout).get_route(validators, headers),
+          new Verb_Put(model, headers, auth_name, request_timeout).get_route(validators, headers)
         ])
 
         // If this model specifies it can upload files,
