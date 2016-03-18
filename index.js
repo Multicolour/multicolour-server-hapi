@@ -47,6 +47,9 @@ class Multicolour_Server_Hapi extends Map {
     this
       .use(require("./lib/headers"))
       .use(require("./lib/validation"))
+      
+      // Register the robots route.
+      .use(require("./lib/robots"))
 
     return this
   }
