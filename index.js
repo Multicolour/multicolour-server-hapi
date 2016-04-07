@@ -24,12 +24,13 @@ class Multicolour_Server_Hapi extends Map {
 
     // Get Hapi.
     const hapi = require("hapi")
+    const config = this.request("host").get("config")
 
     // Configure the server with some basic security.
-    this.__server = new hapi.Server(this.request("host").get("config").get("api_server"))
+    this.__server = new hapi.Server(config.get("api_server"))
 
     // Pass our config along to the server.
-    this.__server.connection(this.request("host").get("config").get("api_connections"))
+    this.__server.connection(config.get("api_connections"))
 
     this
       .reply("raw", () => this.__server)
@@ -47,7 +48,7 @@ class Multicolour_Server_Hapi extends Map {
     this
       .use(require("./lib/headers"))
       .use(require("./lib/validation"))
-      
+
       // Register the robots route.
       .use(require("./lib/robots"))
 
