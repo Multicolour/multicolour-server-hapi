@@ -60,6 +60,22 @@ class Multicolour_Server_Hapi extends Map {
   }
 
   /**
+   * Get the decorator assigned to an Accept header
+   * value, if no negotiation available default
+   * application/json is returned from the interface.
+   * @param  {Object} reply_interface to return decorator on.
+   * @param  {String} accept_value to try and get a decorator for.
+   * @return {Function} decorator on the reply interface.
+   */
+  get_decorator_for_apply_value(reply_interface, accept_value) {
+    // Normalise the passed value.
+    const accept = accept_value ? accept_value.toString().toLowerCase() : "application/json"
+
+    // Return the function.
+    return reply_interface.hasOwnProperty(accept) ?
+      reply_interface[accept].bind(reply_interface) :
+      reply_interface["application/json"].bind(reply_interface)
+  }
 
   flow_runner(task, callback) {
     const Async = require("async")
