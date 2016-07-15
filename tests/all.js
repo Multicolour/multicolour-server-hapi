@@ -62,6 +62,15 @@ multicolour.get("database").start(() => {
 
     test.doesNotThrow(() => headers.set("test", 123), "Can set a test header")
     test.equal(headers.get("test"), 123, "Getting test header value")
+    test.ok(headers.delete("test"), "Can remove test header")
     test.end()
+  })
+
+  tape("Flow runner tests.", test => {
+    test.plan(1)
+
+    server.flow_runner({ model: "test", verb: "POST", payload: {name: "test", age: 10} }, () => {})
+
+    test.doesNotThrow(() => server.flow_runner({ model: "test", verb: "GET" }, () => {}), "Flow runner runs without error.")
   })
 })
