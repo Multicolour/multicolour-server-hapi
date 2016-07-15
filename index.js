@@ -93,7 +93,9 @@ class Multicolour_Server_Hapi extends Map {
 
       // Set the headers.
       Object.keys(header_validator._headers).forEach(header => {
-        headers[header] = header_validator._headers[header]._flags.default
+        const value = header_validator._headers[header]
+        if (typeof value._flags !== "undefined")
+          headers[header] = value._flags.default
       })
 
       let url = "/" + task.model
