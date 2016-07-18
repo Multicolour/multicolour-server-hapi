@@ -113,9 +113,8 @@ class Multicolour_Server_Hapi extends Map {
         const errors = []
 
         // Override the defaults with any expected definitions.
-        if (task.hasOwnProperty("expected")) {
+        if (task.hasOwnProperty("expected"))
           Object.assign(validators, task.expected)
-        }
 
         // Validate the response.
         const code = validators.code(response.statusCode)
@@ -123,8 +122,11 @@ class Multicolour_Server_Hapi extends Map {
         const printable_payload = task.payload ? chalk.yellow.italic(JSON.stringify(task.payload)) : ""
 
         // Check for errors.
-        if (!code) errors.push({ payload: JSON.stringify(payload), expected: validators.code.toString(), actual: response.statusCode })
-        if (!response) errors.push({ payload: JSON.stringify(payload), expected: validators.response.toString(), actual: JSON.stringify(res.result) })
+        if (!code)
+          errors.push({ payload: JSON.stringify(payload), expected: validators.code.toString(), actual: response.statusCode })
+        /* istanbul ignore next : Not testable */
+        if (!response)
+          errors.push({ payload: JSON.stringify(payload), expected: validators.response.toString(), actual: JSON.stringify(res.result) })
 
         // Show output.
         /* eslint-disable */
@@ -139,6 +141,8 @@ class Multicolour_Server_Hapi extends Map {
         /* eslint-enable */
       })
     }), callback)
+
+    return this
   }
 
   /**
@@ -194,6 +198,7 @@ class Multicolour_Server_Hapi extends Map {
 
     // Register the CSRF plugin if enabled.
     if (this.request("csrf_enabled")) {
+      /* istanbul ignore next : Not testable */
       this.use(require("./lib/csrf"))
     }
 
@@ -235,9 +240,9 @@ class Multicolour_Server_Hapi extends Map {
         // If this model specifies it can upload files,
         // add the route required.
         if (model.can_upload_file) {
-          this.__server.route([
+          this.__server.route(
             new Upload_route(model, headers, auth_name, request_timeout).get_route(this.get("validators"), headers)
-          ])
+          )
         }
       }
 
@@ -279,6 +284,7 @@ class Multicolour_Server_Hapi extends Map {
     }
     else {
       /* eslint-disable */
+      /* istanbul ignore next : Not testable */
       console.log("PROD: Not setting up /docs in production.")
       /* eslint-enable */
     }
@@ -321,9 +327,6 @@ class Multicolour_Server_Hapi extends Map {
 
       // Tell any listeners the server has stopped.
       multicolour.trigger("server_stopped")
-
-      // End the show.
-      process.exit(0)
     })
 
     // Exit.

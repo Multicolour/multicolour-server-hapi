@@ -33,44 +33,88 @@ class Test_Plugin extends Map {
   }
 }
 
-// Create a multicolour instance.
-const multicolour = Multicolour
-  .new_from_config_file_path(`${test_content_path}/config.js`)
-  .scan()
+tape("Multicolour_Server_Hapi.", test => {
+  test.plan(10)
 
-let server
+  // Create a multicolour instance.
+  const multicolour = Multicolour
+    .new_from_config_file_path(`${test_content_path}/config.js`)
+    .scan()
 
-// Start the database.
-multicolour.get("database").start(() => {
-  tape("Plugin compatibility.", test => {
+  // Start the database.
+  multicolour.get("database").start(() => {
+
+    // Register the plugin.
     test.doesNotThrow(() => multicolour.use(Multicolour_Hapi_Server), "Multicolour Hapi Server is registered as a plugin without error.")
-    server = multicolour.get("server")
-    test.end()
-  })
 
-  tape("Plugin predictability/coverage.", test => {
-    // Test for items we expect to exist/function once register.
-    test.ok(multicolour.get("server"), "Multicolour Hapi Server is configured as plugin correctly and can `get`.")
-    test.ok(multicolour.get("server").request("raw"), "Can get raw server from plugin")
-    test.doesNotThrow(() => multicolour.get("server").use(Test_Plugin), "Can register plugins without error")
-    test.doesNotThrow(() => server.start(server.stop.bind(server)), "Server starts and stops without error.")
-    test.end()
-  })
-
-  tape("Header validator can set and get headers.", test => {
+    const server = multicolour.get("server")
     const headers = server.request("header_validator")
+
+    // Generate routes so we have something to test against.
+    server.generate_routes()
+
+    const POST_payload = {
+      model: "test",
+      verb: "POST",
+      payload: {
+        name: "test",
+        age: 10
+      }
+    }
+
+    const GET_payload = { model: "test", verb: "GET" }
+    const BAD_payload = { model: "i-dont-exist-in-your-world", verb: "GET" }
+    const custom_validator_payload = {
+      verb: "GET",
+      model: "i-dont-exist-in-your-world",
+      expected: {
+        code: code => code >= 200 && code < 400,
+        res: res => !!res
+      }
+    }
+
+    server
+      .flow_runner(POST_payload, errs => test.equal(errs, null, "No errors during flow POST request"))
+      .flow_runner(GET_payload, errs => test.equal(errs, null, "No errors during flow GET request"))
+      .flow_runner(BAD_payload, errs => test.equal(errs.length, 1, "Expected errors during flow GET request"))
+      .flow_runner(custom_validator_payload, errs => test.equal(errs.length, 1, "Using custom validators"))
+
+    test.doesNotThrow(() => server.use(Test_Plugin), "Can register plugins without error")
+    test.doesNotThrow(() => server.start(server.stop.bind(server, () => {})), "Server starts and stops without error.")
 
     test.doesNotThrow(() => headers.set("test", 123), "Can set a test header")
     test.equal(headers.get("test"), 123, "Getting test header value")
     test.ok(headers.delete("test"), "Can remove test header")
-    test.end()
-  })
 
-  tape("Flow runner tests.", test => {
-    test.plan(1)
-
-    server.flow_runner({ model: "test", verb: "POST", payload: {name: "test", age: 10} }, () => {})
-
-    test.doesNotThrow(() => server.flow_runner({ model: "test", verb: "GET" }, () => {}), "Flow runner runs without error.")
+    server.stop()
   })
 })
+
+
+
+// tape("Flow.", test => {
+//   // This is needed because require cache keeps connections
+//   // alive, even if we don't want it to.
+//   /* eslint-disable */
+//   require("sails-memory").teardown(() => console.log("TORE DAT SHIT DOWN"))
+//   /* eslint-enable */
+//   // Wunderbar. 💩
+//
+//   // Create a multicolour instance.
+//   const multicolour = Multicolour
+//     .new_from_config_file_path(`${test_content_path}/config.js`)
+//     .scan()
+//
+//   multicolour.use(Multicolour_Hapi_Server)
+//
+//   // 3 tests below.
+//   test.plan(2)
+//
+//   const server = multicolour.get("server")
+//   server.use(Test_Plugin)
+//
+//   // Start the database.
+//   multicolour.get("database").start(() => {
+//
+//   })
+// })
