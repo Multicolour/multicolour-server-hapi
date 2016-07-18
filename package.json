@@ -28,22 +28,22 @@
   },
   "dependencies": {
     "@newworldcode/talkie": "^1.0.9",
-    "boom": "^3.0.0",
-    "crumb": "^6.0.0",
-    "hapi": "^13.0.0",
+    "boom": "^3.2.2",
+    "crumb": "^6.0.2",
+    "hapi": "^13.5.0",
     "hapi-swagger": "git+https://github.com/glennjones/hapi-swagger.git",
-    "inert": "^3.2.0",
+    "inert": "^4.0.1",
+    "multicolour": "^0.3.5",
+    "vision": "^4.1.0",
     "joi": "^8.0.1",
-    "multicolour": "^0.3.2",
-    "vision": "^4.0.1",
     "waterline-joi": "^1.0.12"
   },
   "devDependencies": {
-    "eslint": "^2.1.0",
-    "istanbul": "^0.4.0",
+    "eslint": "^3.1.0",
+    "istanbul": "^0.4.4",
     "multicolour-seed": "0.0.6",
-    "sails-memory": "^0.10.6",
-    "tap-spec": "^4.1.0",
-    "tape": "^4.2.0"
+    "sails-memory": "^0.10.7",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.6.0"
   }
 }
