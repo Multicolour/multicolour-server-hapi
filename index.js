@@ -124,25 +124,48 @@ class Multicolour_Server_Hapi extends Map {
       // Get the configured request timeout.
       const request_timeout = host.get("config").get("settings").timeout
 
+      // Create the stuff we'll need.
+      const get_route = new Verb_Get(model, headers, auth_name, request_timeout)
+      const post_route = new Verb_Post(model, headers, auth_name, request_timeout)
+      const patch_route = new Verb_Patch(model, headers, auth_name, request_timeout)
+      const delete_route = new Verb_Delete(model, headers, auth_name, request_timeout)
+      const put_route = new Verb_Put(model, headers, auth_name, request_timeout)
+      const upload_route = new Upload_route(model, headers, auth_name, request_timeout)
+
+      // Routes we generate will be pushed here.
+      let routes = []
+
       // Create routes if we didn't specifically say not to
       // and this model isn't a junction table.
       if (!model.NO_AUTO_GEN_ROUTES && !model.meta.junctionTable) {
-        // Add the standard routes.
-        this.__server.route([
-          new Verb_Get(model, headers, auth_name, request_timeout).get_route(validators, headers),
-          new Verb_Post(model, headers, auth_name, request_timeout).get_route(validators, headers),
-          new Verb_Patch(model, headers, auth_name, request_timeout).get_route(validators, headers),
-          new Verb_Delete(model, headers, auth_name, request_timeout).get_route(validators, headers),
-          new Verb_Put(model, headers, auth_name, request_timeout).get_route(validators, headers)
-        ])
+        if (model.$_endpoint_class) {
+          // Add the standard routes.
+          if (model.GET) routes.push(get_route.get_route(validators, headers))
+          if (model.POST) routes.push(post_route.get_route(validators, headers))
+          if (model.PATCH) routes.push(patch_route.get_route(validators, headers))
+          if (model.DELETE) routes.push(delete_route.get_route(validators, headers))
+          if (model.PUT) routes.push(put_route.get_route(validators, headers))
+        }
+        else {
+          routes = [
+            get_route.get_route(validators, headers),
+            post_route.get_route(validators, headers),
+            patch_route.get_route(validators, headers),
+            delete_route.get_route(validators, headers),
+            put_route.get_route(validators, headers)
+          ]
+        }
 
         // If this model specifies it can upload files,
         // add the route required.
         if (model.can_upload_file) {
-          this.__server.route([
-            new Upload_route(model, headers, auth_name, request_timeout).get_route(this.get("validators"), headers)
-          ])
+          routes.push(
+            upload_route.get_route(this.get("validators"), headers)
+          )
         }
+
+        // Register routes.
+        this.__server.route(routes)
       }
 
       // If there are custom routes to load, fire the function with the server.
