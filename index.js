@@ -38,6 +38,7 @@ class Multicolour_Server_Hapi extends Map {
 
       // Set some defaults.
       .reply("csrf_enabled", false)
+      .set("did_generate_routes", false)
       .set("validators", [])
 
     // Check there's an auth config available.
@@ -199,6 +200,16 @@ class Multicolour_Server_Hapi extends Map {
    * @return {Multicolour_Server_Hapi} Object for chaining.
    */
   generate_routes() {
+    if (this.get("did_generate_routes") === true) {
+      /* eslint-disable */
+      console.warn("You asked me to generate_routes when routes are already generated. Skipping...")
+      /* eslint-enable */
+      return this
+    }
+    else {
+      this.set("did_generate_routes", true)
+    }
+
     // Register the CSRF plugin if enabled.
     if (this.request("csrf_enabled")) {
       this.use(require("./lib/csrf"))
