@@ -32,12 +32,16 @@ class Multicolour_Server_Hapi extends Map {
     // Pass our config along to the server.
     this.__server.connection(config.get("api_connections"))
 
+    const host = config.get("api_connections").host || "localhost"
+    const port = config.get("api_connections").port || 1811
+
     this
       .reply("raw", () => this.__server)
 
       // Set some defaults.
       .reply("csrf_enabled", false)
       .set("validators", [])
+      .set("api_root", `http://${host}:${port}`)
 
     // Check there's an auth config available.
     if (typeof this.request("auth_config") === "undefined") {
@@ -217,6 +221,9 @@ class Multicolour_Server_Hapi extends Map {
     this.__server.start(() => {
       // Tell any listeners the server has started.
       multicolour.trigger("server_started")
+
+      // Set the server root.
+      this.set("api_root", this.__server.info.uri)
 
       // Run the callback
       callback && callback()
