@@ -13,7 +13,6 @@ const Verb_Patch = require("./lib/verbs/patch")
 
 // Get tools.
 const Joi = require("joi")
-const chalk = require("chalk")
 
 class Multicolour_Server_Hapi extends Map {
   /**
@@ -26,6 +25,7 @@ class Multicolour_Server_Hapi extends Map {
     // Get Hapi.
     const hapi = require("hapi")
     const config = this.request("host").get("config")
+    const settings = config.get("settings")
 
     // Configure the server with some basic security.
     this.__server = new hapi.Server(config.get("api_server"))
@@ -57,6 +57,11 @@ class Multicolour_Server_Hapi extends Map {
 
       // Register the robots route.
       .use(require("./lib/robots"))
+
+    // Do we want websockets?
+    if (!settings.hasOwnProperty("websockets") || settings.websockets === true) {
+      this.use(require("./lib/sockets"))
+    }
 
     // Register the flow runner for tests.
     this.set("flow_runner", this.flow_runner.bind(this))
