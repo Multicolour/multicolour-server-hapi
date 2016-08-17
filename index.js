@@ -229,7 +229,7 @@ class Multicolour_Server_Hapi extends Map {
     // If it's not a production environment,
     // get the Swagger library and it's interface.
     if (process.env.NODE_ENV !== "production") {
-      require("./lib/swagger-ui")(this)
+      this.use(require("./lib/swagger-ui"))
     }
     else {
       /* eslint-disable */
