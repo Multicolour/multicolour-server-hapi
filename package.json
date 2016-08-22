@@ -27,7 +27,7 @@
     "node": ">= 4.0.0"
   },
   "peerDependencies": {
-    "multicolour": "^0.4.3",
+    "multicolour": "^0.4.3"
   },
   "dependencies": {
     "@newworldcode/talkie": "^1.0.9",
