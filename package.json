@@ -1,6 +1,6 @@
 {
   "name": "multicolour-server-hapi",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "HapiJS server generator for Multicolour",
   "main": "index.js",
   "scripts": {
