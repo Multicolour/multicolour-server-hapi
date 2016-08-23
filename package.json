@@ -26,9 +26,6 @@
   "engines": {
     "node": ">= 4.0.0"
   },
-  "peerDependencies": {
-    "multicolour": "^0.4.3"
-  },
   "dependencies": {
     "@newworldcode/talkie": "^1.0.9",
     "async": "^2.0.0",
@@ -51,6 +48,7 @@
     "multicolour-seed": "0.0.6",
     "sails-memory": "^0.10.7",
     "tap-spec": "^4.1.1",
-    "tape": "^4.6.0"
+    "tape": "^4.6.0",
+    "multicolour": "^0.4.3"
   }
 }
