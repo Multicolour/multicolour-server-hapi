@@ -251,8 +251,9 @@ class Multicolour_Server_Hapi extends Map {
       // Tell any listeners the server has started.
       multicolour.trigger("server_started")
 
-      // Set the server root.
-      this.set("api_root", this.__server.info.uri)
+      // Set the server root if one is available.
+      if (this.__server.info && this.__server.info.uri)
+        this.set("api_root", this.__server.info.uri)
 
       // Run the callback
       callback && callback()
@@ -276,7 +277,7 @@ class Multicolour_Server_Hapi extends Map {
     // Stop the server.
     this.__server.stop(() => {
       /* eslint-disable */
-      console.log(`Server stopped running at: ${this.__server.info.uri}`)
+      console.log(`Server stopped running at: ${this.get("api_root")}`)
       /* eslint-enable */
 
       // Run the callback if it exists.
