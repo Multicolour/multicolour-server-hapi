@@ -42,7 +42,6 @@ class Multicolour_Server_Hapi extends Map {
       // Set some defaults.
       .reply("csrf_enabled", false)
       .set("did_generate_routes", false)
-      .set("validators", [])
       .set("api_root", `http://${host}:${port}`)
 
     // Check there's an auth config available.
@@ -215,7 +214,7 @@ class Multicolour_Server_Hapi extends Map {
     // Get the headers required to make a request.
     const headers = Joi.object(this.request("header_validator").get()).unknown(true)
 
-    const validators = this.get("validators")
+    const validators = host.get("validators")
 
     // Loop over the models to create the CRUD for each blueprint.
     for (const model_name in models) {
