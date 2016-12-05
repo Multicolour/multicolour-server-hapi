@@ -53,20 +53,19 @@ class Multicolour_Server_Hapi extends Map {
     // Use the default validator until otherwise set.
     this
       .use(require("./lib/headers"))
-      .use(require("./lib/validation"))
 
       // Register the robots route.
       .use(require("./lib/robots"))
 
     // Register the flow runner for tests.
-    this.set("flow_runner", this.flow_runner.bind(this))
+    // this.set("flow_runner", this.flow_runner.bind(this))
 
     return this
   }
 
-  flow_runner(task, callback) {
+  /*flow_runner(task, callback) {
     const Async = require("async")
-    const validators = this.get("validators")
+    const validators = this.get("host").get("validators")
     const method = task.verb.toString().toUpperCase()
     const non_create_write_verbs = new Set(["put", "patch", "delete"])
 
@@ -128,12 +127,10 @@ class Multicolour_Server_Hapi extends Map {
         // Check for errors.
         if (!code)
           errors.push({ payload: JSON.stringify(payload), expected: validators.code.toString(), actual: response.statusCode })
-        /* istanbul ignore next : Not testable */
         if (!response)
           errors.push({ payload: JSON.stringify(payload), expected: validators.response.toString(), actual: JSON.stringify(res.result) })
 
         // Show output.
-        /* eslint-disable */
         if (errors.length > 0) {
           console.log(`👎  ${chalk.red.bold.underline("FAILED:")} ${chalk.blue.bold(method)}:${validator_name_printable} ${chalk.white(url)} ${printable_payload}`)
           next(errors, null)
@@ -142,12 +139,11 @@ class Multicolour_Server_Hapi extends Map {
           console.log(`👍  ${chalk.green.bold.underline("SUCCESS:")} ${chalk.blue.bold(method)}:${validator_name_printable} ${chalk.white(url)} ${printable_payload}`)
           next(null, task)
         }
-        /* eslint-enable */
       })
     }), callback)
 
     return this
-  }
+  }*/
 
   /**
    * Servers support plugins for things like authentication.
