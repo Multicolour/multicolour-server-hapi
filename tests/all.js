@@ -41,6 +41,8 @@ tape("Multicolour_Server_Hapi.", test => {
     .new_from_config_file_path(`${test_content_path}/config.js`)
     .scan()
 
+  multicolour._enable_user_model()
+
   // Start the database.
   multicolour.get("database").start(() => {
 
@@ -89,32 +91,3 @@ tape("Multicolour_Server_Hapi.", test => {
     server.stop()
   })
 })
-
-
-
-// tape("Flow.", test => {
-//   // This is needed because require cache keeps connections
-//   // alive, even if we don't want it to.
-//   /* eslint-disable */
-//   require("sails-memory").teardown(() => console.log("TORE DAT SHIT DOWN"))
-//   /* eslint-enable */
-//   // Wunderbar. 💩
-//
-//   // Create a multicolour instance.
-//   const multicolour = Multicolour
-//     .new_from_config_file_path(`${test_content_path}/config.js`)
-//     .scan()
-//
-//   multicolour.use(Multicolour_Hapi_Server)
-//
-//   // 3 tests below.
-//   test.plan(2)
-//
-//   const server = multicolour.get("server")
-//   server.use(Test_Plugin)
-//
-//   // Start the database.
-//   multicolour.get("database").start(() => {
-//
-//   })
-// })
