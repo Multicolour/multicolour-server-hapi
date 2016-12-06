@@ -37,7 +37,6 @@
     "inert": "^4.0.3",
     "joi": "^10.0.5",
     "lout": "^9.2.0",
-    "multicolour": "^0.4.8",
     "vision": "^4.1.1",
     "waterline-joi": "^1.0.12"
   },

@@ -1,8 +1,5 @@
 "use strict"
 
-// Get the handlers so we can set the host.
-const handlers = require("./lib/handlers")
-
 // Get our verbs.
 const Upload_route = require("./lib/upload-route")
 const Verb_Delete = require("./lib/verbs/delete")
@@ -10,10 +7,6 @@ const Verb_Get = require("./lib/verbs/get")
 const Verb_Post = require("./lib/verbs/post")
 const Verb_Put = require("./lib/verbs/put")
 const Verb_Patch = require("./lib/verbs/patch")
-
-// Get tools.
-const Joi = require("joi")
-const chalk = require("chalk")
 
 class Multicolour_Server_Hapi extends Map {
   /**
@@ -56,93 +49,11 @@ class Multicolour_Server_Hapi extends Map {
       // Register the robots route.
       .use(require("./lib/robots"))
 
-    // Register the flow runner for tests.
-    // this.set("flow_runner", this.flow_runner.bind(this))
+      // Register the handlers.
+      .use(require("./lib/handlers"))
 
     return this
   }
-
-  /*flow_runner(task, callback) {
-    const Async = require("async")
-    const validators = this.get("host").get("validators")
-    const method = task.verb.toString().toUpperCase()
-    const non_create_write_verbs = new Set(["put", "patch", "delete"])
-
-    Async.parallel(validators.map(validator => next => {
-      // Get the validator.
-      const header_validator = validator.request("header_validator")
-      const headers = {}
-
-      // Get a printable name.
-      const validator_name_printable = chalk.green(validator.constructor.name)
-
-      // Set the headers.
-      Object.keys(header_validator._headers).forEach(header => {
-        const value = header_validator._headers[header]
-        if (typeof value._flags !== "undefined")
-          headers[header] = value._flags.default
-      })
-
-      let url = "/" + task.model
-      const search = Object.assign({}, task.search)
-
-      // If the verb wasn't to create but was to update
-      // create a new url
-      if (
-        non_create_write_verbs.has(task.verb) ||
-        task.verb.toLowerCase() === "get"
-      ) {
-        url = `/${task.model}/${search.id || ""}`
-      }
-
-      delete search.id
-
-      let query = require("querystring").stringify(search)
-
-      // Create the payload to send to Hapi.
-      const payload = { url, method, headers, query }
-
-      // If it's not a get request, add the payload.
-      if (method !== "GET") payload.payload = task.payload
-
-      // Make the request.
-      this.__server.inject(payload, response => {
-        const validators = {
-          code: code => code >= 200 && code < 400,
-          res: res => !!res
-        }
-
-        const errors = []
-
-        // Override the defaults with any expected definitions.
-        if (task.hasOwnProperty("expected"))
-          Object.assign(validators, task.expected)
-
-        // Validate the response.
-        const code = validators.code(response.statusCode)
-        const res = validators.res(response.result)
-        const printable_payload = task.payload ? chalk.yellow.italic(JSON.stringify(task.payload)) : ""
-
-        // Check for errors.
-        if (!code)
-          errors.push({ payload: JSON.stringify(payload), expected: validators.code.toString(), actual: response.statusCode })
-        if (!response)
-          errors.push({ payload: JSON.stringify(payload), expected: validators.response.toString(), actual: JSON.stringify(res.result) })
-
-        // Show output.
-        if (errors.length > 0) {
-          console.log(`👎  ${chalk.red.bold.underline("FAILED:")} ${chalk.blue.bold(method)}:${validator_name_printable} ${chalk.white(url)} ${printable_payload}`)
-          next(errors, null)
-        }
-        else {
-          console.log(`👍  ${chalk.green.bold.underline("SUCCESS:")} ${chalk.blue.bold(method)}:${validator_name_printable} ${chalk.white(url)} ${printable_payload}`)
-          next(null, task)
-        }
-      })
-    }), callback)
-
-    return this
-  }*/
 
   /**
    * Servers support plugins for things like authentication.
@@ -203,34 +114,22 @@ class Multicolour_Server_Hapi extends Map {
 
     // Get the host instance.
     const host = this.request("host")
-    handlers.set_host(host)
 
     // Get the models from the database instance.
     const models = host.get("database").get("models")
-
-    // Get the auth strategy
-    const auth_name = this.request("auth_config")
-
-    // Get the headers required to make a request.
-    const headers = Joi.object(this.request("header_validator").get()).unknown(true)
-
-    const validators = host.get("validators")
 
     // Loop over the models to create the CRUD for each blueprint.
     for (const model_name in models) {
       // Make the below easier to read.
       const model = models[model_name]
 
-      // Get the configured request timeout.
-      const request_timeout = host.get("config").get("settings").timeout
-
       // Create the stuff we'll need.
-      const get_route = new Verb_Get(model, headers, auth_name, request_timeout)
-      const post_route = new Verb_Post(model, headers, auth_name, request_timeout)
-      const patch_route = new Verb_Patch(model, headers, auth_name, request_timeout)
-      const delete_route = new Verb_Delete(model, headers, auth_name, request_timeout)
-      const put_route = new Verb_Put(model, headers, auth_name, request_timeout)
-      const upload_route = new Upload_route(model, headers, auth_name, request_timeout)
+      const get_route = new Verb_Get(this, model)
+      const post_route = new Verb_Post(this, model)
+      const patch_route = new Verb_Patch(this, model)
+      const delete_route = new Verb_Delete(this, model)
+      const put_route = new Verb_Put(this, model)
+      const upload_route = new Upload_route(this, model)
 
       // Routes we generate will be pushed here.
       let routes = []
@@ -240,19 +139,19 @@ class Multicolour_Server_Hapi extends Map {
       if (!model.NO_AUTO_GEN_ROUTES && !model.meta.junctionTable) {
         if (model.$_endpoint_class) {
           // Add the standard routes.
-          if (model.GET) routes.push(get_route.get_route(validators, headers))
-          if (model.POST) routes.push(post_route.get_route(validators, headers))
-          if (model.PATCH) routes.push(patch_route.get_route(validators, headers))
-          if (model.DELETE) routes.push(delete_route.get_route(validators, headers))
-          if (model.PUT) routes.push(put_route.get_route(validators, headers))
+          if (model.GET) routes.push(get_route.get_route())
+          if (model.POST) routes.push(post_route.get_route())
+          if (model.PATCH) routes.push(patch_route.get_route())
+          if (model.DELETE) routes.push(delete_route.get_route())
+          if (model.PUT) routes.push(put_route.get_route())
         }
         else {
           routes = [
-            get_route.get_route(validators, headers),
-            post_route.get_route(validators, headers),
-            patch_route.get_route(validators, headers),
-            delete_route.get_route(validators, headers),
-            put_route.get_route(validators, headers)
+            get_route.get_route(),
+            post_route.get_route(),
+            patch_route.get_route(),
+            delete_route.get_route(),
+            put_route.get_route()
           ]
         }
 
@@ -260,7 +159,7 @@ class Multicolour_Server_Hapi extends Map {
         // add the route required.
         if (model.can_upload_file) {
           routes.push(
-            upload_route.get_route(this.get("validators"), headers)
+            upload_route.get_route(this.get("validators"))
           )
         }
 
