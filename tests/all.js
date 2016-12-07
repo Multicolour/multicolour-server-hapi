@@ -33,18 +33,18 @@ class Test_Plugin extends Map {
   }
 }
 
-tape("Multicolour_Server_Hapi.", test => {
-  test.plan(10)
+// Create a multicolour instance.
+const multicolour = Multicolour
+  .new_from_config_file_path(`${test_content_path}/config.js`)
+  .scan()
 
-  // Create a multicolour instance.
-  const multicolour = Multicolour
-    .new_from_config_file_path(`${test_content_path}/config.js`)
-    .scan()
+multicolour._enable_user_model()
 
-  multicolour._enable_user_model()
+// Start the database.
+multicolour.get("database").start(() => {
 
-  // Start the database.
-  multicolour.get("database").start(() => {
+  tape("Multicolour_Server_Hapi.", test => {
+    test.plan(10)
 
     // Register the plugin.
     test.doesNotThrow(() => multicolour.use(Multicolour_Hapi_Server), "Multicolour Hapi Server is registered as a plugin without error.")
