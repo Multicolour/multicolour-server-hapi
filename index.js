@@ -19,12 +19,18 @@ class Multicolour_Server_Hapi extends Map {
     // Get Hapi.
     const hapi = require("hapi")
     const config = this.request("host").get("config")
+    const connections_config = config.get("api_connections")
+
+    if (!connections_config.hasOwnProperty("labels"))
+      connections_config.labels = []
+
+    connections_config.labels.push("multicolour-server-hapi")
 
     // Configure the server with some basic security.
     this.__server = new hapi.Server(config.get("api_server"))
 
     // Pass our config along to the server.
-    this.__server.connection(config.get("api_connections"))
+    this.__server.connection(connections_config)
 
     const host = config.get("api_connections").host || "localhost"
     const port = config.get("api_connections").port || 1811
@@ -159,7 +165,7 @@ class Multicolour_Server_Hapi extends Map {
         // add the route required.
         if (model.can_upload_file) {
           routes.push(
-            upload_route.get_route(this.get("validators"))
+            upload_route.get_route(host.get("validators"))
           )
         }
 
@@ -188,6 +194,9 @@ class Multicolour_Server_Hapi extends Map {
     // Get the host.
     const multicolour = this.request("host")
 
+    // Get the server.
+    const server = this.__server.select("multicolour-server-hapi")
+
     // Tell any listeners the server is starting.
     multicolour.trigger("server_starting")
 
@@ -195,7 +204,7 @@ class Multicolour_Server_Hapi extends Map {
     // code quality processors, pragma the crap out of it..
     /* eslint-disable */
     /* istanbul ignore next : Not testable */
-    const callback = in_callback || (() => console.log(`Server running at: ${this.__server.info.uri}`))
+    const callback = in_callback || (() => console.log(`Server running at: ${server.info.uri}`))
     /* eslint-enable */
 
     // If it's not a production environment,
@@ -219,7 +228,7 @@ class Multicolour_Server_Hapi extends Map {
       multicolour.trigger("server_started")
 
       // Set the server root.
-      this.set("api_root", this.__server.info.uri)
+      this.set("api_root", server.info.uri)
 
       // Run the callback
       callback && callback()
@@ -243,7 +252,7 @@ class Multicolour_Server_Hapi extends Map {
     // Stop the server.
     this.__server.stop(() => {
       /* eslint-disable */
-      console.log(`Server stopped running at: ${this.__server.info.uri}`)
+      console.log(`Server stopped running at: ${this.__server.select("multicolour-server-hapi").info.uri}`)
       /* eslint-enable */
 
       // Run the callback if it exists.

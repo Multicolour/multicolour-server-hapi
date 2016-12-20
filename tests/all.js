@@ -44,7 +44,7 @@ multicolour._enable_user_model()
 multicolour.get("database").start(() => {
 
   tape("Multicolour_Server_Hapi.", test => {
-    test.plan(10)
+    test.plan(6)
 
     // Register the plugin.
     test.doesNotThrow(() => multicolour.use(Multicolour_Hapi_Server), "Multicolour Hapi Server is registered as a plugin without error.")
@@ -54,32 +54,6 @@ multicolour.get("database").start(() => {
 
     // Generate routes so we have something to test against.
     server.generate_routes()
-
-    const POST_payload = {
-      model: "test",
-      verb: "POST",
-      payload: {
-        name: "test",
-        age: 10
-      }
-    }
-
-    const GET_payload = { model: "test", verb: "GET" }
-    const BAD_payload = { model: "i-dont-exist-in-your-world", verb: "GET" }
-    const custom_validator_payload = {
-      verb: "GET",
-      model: "i-dont-exist-in-your-world",
-      expected: {
-        code: code => code >= 200 && code < 400,
-        res: res => !!res
-      }
-    }
-
-    server
-      .flow_runner(POST_payload, errs => test.equal(errs, null, "No errors during flow POST request"))
-      .flow_runner(GET_payload, errs => test.equal(errs, null, "No errors during flow GET request"))
-      .flow_runner(BAD_payload, errs => test.equal(errs.length, 1, "Expected errors during flow GET request"))
-      .flow_runner(custom_validator_payload, errs => test.equal(errs.length, 1, "Using custom validators"))
 
     test.doesNotThrow(() => server.use(Test_Plugin), "Can register plugins without error")
     test.doesNotThrow(() => server.start(server.stop.bind(server, () => {})), "Server starts and stops without error.")
