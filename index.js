@@ -21,6 +21,8 @@ class Multicolour_Server_Hapi extends Map {
     const config = this.request("host").get("config")
     const connections_config = config.get("api_connections")
 
+    // Create a default label for us to use internally.
+    // Check the labels array exists first though.
     if (!connections_config.hasOwnProperty("labels"))
       connections_config.labels = []
 
