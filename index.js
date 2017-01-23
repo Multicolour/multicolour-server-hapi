@@ -1,5 +1,7 @@
 "use strict"
 
+const debug = require("debug")
+
 // Get our verbs.
 const Upload_route = require("./lib/upload-route")
 const Verb_Delete = require("./lib/verbs/delete")
@@ -15,6 +17,8 @@ class Multicolour_Server_Hapi extends Map {
    */
   constructor() {
     super()
+
+    this.debug = debug("multicolour:server-hapi")
 
     // Get Hapi.
     const hapi = require("hapi")
@@ -190,9 +194,9 @@ class Multicolour_Server_Hapi extends Map {
   /**
    * Start required services for this plugin.
    * @param  {Function} in_callback to execute when finished.
-   * @return {Multicolour_Server_Hapi} Object for chaining.
+   * @return {Promise} Promise in resolved state.
    */
-  start(in_callback) {
+  start() {
     // Get the host.
     const multicolour = this.request("host")
 
@@ -201,13 +205,6 @@ class Multicolour_Server_Hapi extends Map {
 
     // Tell any listeners the server is starting.
     multicolour.trigger("server_starting")
-
-    // Default the callback, horrible for all
-    // code quality processors, pragma the crap out of it..
-    /* eslint-disable */
-    /* istanbul ignore next : Not testable */
-    const callback = in_callback || (() => console.log(`Server running at: ${server.info.uri}`))
-    /* eslint-enable */
 
     // If it's not a production environment,
     // get the Swagger library and it's interface.
@@ -225,47 +222,50 @@ class Multicolour_Server_Hapi extends Map {
     this.generate_routes()
 
     // Start the server.
-    this.__server.start(() => {
-      // Tell any listeners the server has started.
-      multicolour.trigger("server_started")
+    return new Promise((resolve, reject) => {
+      this.__server.start(err => {
+        if (err) {
+          return reject(err)
+        }
 
-      // Set the server root.
-      this.set("api_root", server.info.uri)
+        this.debug("Hapi server started successfully.")
 
-      // Run the callback
-      callback && callback()
+        // Tell any listeners the server has started.
+        multicolour.trigger("server_started")
+
+        // Set the server root.
+        this.set("api_root", server.info.uri)
+
+        // Run the callback
+        resolve(server)
+      })
     })
-
-    // Exit.
-    return this
   }
 
   /**
    * Stop required services for this plugin.
    * @param  {Function} in_callback to execute when finished.
-   * @return {Multicolour_Server_Hapi} Object for chaining.
+   * @return {Promise} Promise in resolved state.
    */
-  stop(callback) {
+  stop() {
     const multicolour = this.request("host")
 
     // Tell any listeners the server is stopping.
     multicolour.trigger("server_stopping")
 
     // Stop the server.
-    this.__server.stop(() => {
-      /* eslint-disable */
-      console.log(`Server stopped running at: ${this.__server.select("multicolour-server-hapi").info.uri}`)
-      /* eslint-enable */
+    return new Promise(resolve => {
+      this.__server.stop(() => {
+        /* eslint-disable */
+        console.log(`Server stopped running at: ${this.__server.select("multicolour-server-hapi").info.uri}`)
+        /* eslint-enable */
 
-      // Run the callback if it exists.
-      callback && callback()
+        // Tell any listeners the server has stopped.
+        multicolour.trigger("server_stopped")
 
-      // Tell any listeners the server has stopped.
-      multicolour.trigger("server_stopped")
+        resolve()
+      })
     })
-
-    // Exit.
-    return this
   }
 }
 
