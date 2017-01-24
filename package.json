@@ -1,7 +1,7 @@
 {
   "name": "multicolour-server-hapi",
-  "version": "1.7.0-beta",
-  "description": "Hapi3S server generator for Multicolour",
+  "version": "1.7.1-beta",
+  "description": "HapiJS server generator for Multicolour",
   "main": "index.js",
   "scripts": {
     "test": "tape tests/*.js | tap-spec",
