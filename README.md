@@ -47,17 +47,13 @@ an auth plugin for `multicolour-server-hapi` you need to register your plugin vi
 the `.use(plugin)` function. I.E
 
 ```js
-
-// Get the types that Multicolour understands.
-const types = require("multicolour/lib/consts")
-
 // This is the logic of our plugin.
 class My_Auth_Plugin extends Map {
-  // Required methods on ALL plugins.
-  constructor() { super() }
-  register() { return this }
+  register(Multicolour_Server_Hapi) { return this }
+
   create_session(request, reply) {}
   destroy_session(request, reply) {}
+
   handlers() {
     return new Map([
       ["create", () => this.create_session.bind(this)],
@@ -67,21 +63,18 @@ class My_Auth_Plugin extends Map {
 }
 
 // This is the registration signature of the plugin.
-module.exports = {
-  type: types.AUTH_PLUGIN,
-  plugin: My_Auth_Plugin
-}
+module.exports = My_Auth_Plugin
 ```
 
 In the above class definition, we can see `My_Auth_Plugin` has some interesting things:  
 
-5 methods, `constructor`, `register`, `handlers`, `create_session` and `destroy_session`.  
+5 methods, `register`, `handlers`, `create_session` and `destroy_session`.  
 `extends Map`, `super()`.
 
-The five methods are the signature of the plugin, this shouldn't be confused with the registration signature (the `module.exports = ...`). The server plugin should call these functions to register and handle behaviour when and where it is required.
+The methods are the signature of the plugin, this shouldn't be confused with the registration signature (the `module.exports = ...`). The server plugin should call these functions to register and handle behaviour when and where it is required.
 
 The plugin `extends Map` as we need to store information on the class at runtime without
-some other complicated interface wrapping the plugin. `super()` is required as per the ES6 specification.
+some other complicated interface wrapping the plugin.
 
 Any plugins registered to this server won't receive the graceful shutdown message that the server does, this may change if it become and error but message propagation is a messy business.
 
