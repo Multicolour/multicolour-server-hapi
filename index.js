@@ -218,27 +218,43 @@ class Multicolour_Server_Hapi extends Map {
       /* eslint-enable */
     }
 
-    // Generate the routes.
-    this.generate_routes()
-
     // Start the server.
     return new Promise((resolve, reject) => {
-      this.__server.start(err => {
-        if (err) {
-          return reject(err)
-        }
+      let error_in_routes = false
 
-        this.debug("Hapi server started successfully.")
+      try {
+        // Generate the routes.
+        this.generate_routes()
+      } catch(error) {
+        /* eslint-disable */
+        console.error(error)
+        /* eslint-enable */
 
-        // Tell any listeners the server has started.
-        multicolour.trigger("server_started")
+        error_in_routes = true
 
-        // Set the server root.
-        this.set("api_root", server.info.uri)
+        // Exit.
+        return reject(error)
+      }
 
-        // Run the callback
-        resolve(server)
-      })
+      // Start the server.
+      if (!error_in_routes) {
+        this.__server.start(err => {
+          if (err) {
+            return reject(err)
+          }
+
+          this.debug("Hapi server started successfully.")
+
+          // Tell any listeners the server has started.
+          multicolour.trigger("server_started")
+
+          // Set the server root.
+          this.set("api_root", server.info.uri)
+
+          // Run the callback
+          resolve(server)
+        })
+      }
     })
   }
 
