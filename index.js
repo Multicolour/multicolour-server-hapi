@@ -64,6 +64,19 @@ class Multicolour_Server_Hapi extends Map {
       // Register the handlers.
       .use(require("./lib/handlers"))
 
+    // Parse the query.
+    this.__server.ext("onRequest", (request, reply) => {
+      const qs = require("qs")
+      const url = require("url")
+
+      const uri = request.raw.req.url
+      const parsed = url.parse(uri, false)
+      parsed.query = qs.parse(parsed.query)
+      request.setUrl(parsed)
+
+      reply.continue()
+    })
+
     return this
   }
 
