@@ -1,6 +1,6 @@
 {
   "name": "multicolour-server-hapi",
-  "version": "1.7.5",
+  "version": "1.7.6",
   "description": "HapiJS server generator for Multicolour",
   "main": "index.js",
   "scripts": {
@@ -13,8 +13,7 @@
   },
   "keywords": [
     "hapijs",
-    "multicolour",
-    "OAuth"
+    "multicolour"
   ],
   "author": "newworldcode <hello@newworld.codes> (https://newworld.codes)",
   "license": "MIT",
