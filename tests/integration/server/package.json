@@ -1,0 +1,29 @@
+{
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "multicolour start"
+  },
+  "engineStrict": true,
+  "engines": {
+    "node": ">= 4.0.0"
+  },
+  "dependencies": {
+    "joi": "^10.2.2",
+    "multicolour": "^0.6.3",
+    "multicolour-server-hapi": "^1.4.0",
+    "sails-memory": "0.10.7"
+  },
+  "multicolour": {
+    "config": "./config",
+    "plugins": [
+      {
+        "as": "server",
+        "name": "multicolour-server-hapi",
+        "plugins": []
+      }
+    ]
+  },
+  "name": "server",
+  "description": "Integration test server"
+}

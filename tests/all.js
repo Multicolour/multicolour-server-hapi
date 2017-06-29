@@ -1,7 +1,5 @@
 "use strict"
 
-process.env.NODE_ENV = "development"
-
 // Get the testing library.
 const tape = require("tape")
 
@@ -40,28 +38,24 @@ const multicolour = Multicolour
 
 multicolour._enable_user_model()
 
-// Start the database.
-multicolour.get("database").start(() => {
+tape("Multicolour_Server_Hapi.", test => {
+  test.plan(6)
 
-  tape("Multicolour_Server_Hapi.", test => {
-    test.plan(6)
+  // Register the plugin.
+  test.doesNotThrow(() => multicolour.use(Multicolour_Hapi_Server), "Multicolour Hapi Server is registered as a plugin without error.")
 
-    // Register the plugin.
-    test.doesNotThrow(() => multicolour.use(Multicolour_Hapi_Server), "Multicolour Hapi Server is registered as a plugin without error.")
+  const server = multicolour.get("server")
+  const headers = server.request("header_validator")
 
-    const server = multicolour.get("server")
-    const headers = server.request("header_validator")
+  // Generate routes so we have something to test against.
+  server.generate_routes()
 
-    // Generate routes so we have something to test against.
-    server.generate_routes()
+  test.doesNotThrow(() => server.use(Test_Plugin), "Can register plugins without error")
+  test.doesNotThrow(() => server.start(server.stop.bind(server, () => {})), "Server starts and stops without error.")
 
-    test.doesNotThrow(() => server.use(Test_Plugin), "Can register plugins without error")
-    test.doesNotThrow(() => server.start(server.stop.bind(server, () => {})), "Server starts and stops without error.")
+  test.doesNotThrow(() => headers.set("test", 123), "Can set a test header")
+  test.equal(headers.get("test"), 123, "Getting test header value")
+  test.ok(headers.delete("test"), "Can remove test header")
 
-    test.doesNotThrow(() => headers.set("test", 123), "Can set a test header")
-    test.equal(headers.get("test"), 123, "Getting test header value")
-    test.ok(headers.delete("test"), "Can remove test header")
-
-    server.stop()
-  })
+  server.stop()
 })
