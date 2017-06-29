@@ -1,5 +1,7 @@
 # multicolour-server-hapi
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/Multicolour/multicolour-server-hapi.svg)](https://greenkeeper.io/)
+
 [![Build Status](https://travis-ci.org/Multicolour/multicolour-server-hapi.svg)](https://travis-ci.org/Multicolour/multicolour-server-hapi)
 [![Coverage Status](https://coveralls.io/repos/Multicolour/multicolour-server-hapi/badge.svg?branch=master&service=github)](https://coveralls.io/github/Multicolour/multicolour-server-hapi?branch=master)
 [![Dependency Status](https://david-dm.org/Multicolour/multicolour-server-hapi.svg)](https://david-dm.org/Multicolour/multicolour-server-hapi)
