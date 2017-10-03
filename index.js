@@ -45,7 +45,7 @@ class Multicolour_Server_Hapi extends Map {
       .reply("raw", () => this.__server)
 
       // Set some defaults.
-      .reply("csrf_enabled", false)
+      .reply("csrf_enabled", true)
       .set("did_generate_routes", false)
       .set("api_root", `http://${host}:${port}`)
 
