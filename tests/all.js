@@ -1,7 +1,5 @@
 "use strict"
 
-process.env.NODE_ENV = "development"
-
 // Get the testing library.
 const tape = require("tape")
 

@@ -66,8 +66,8 @@ class Multicolour_Server_Hapi extends Map {
 
       // Register the rate limiter.
       .use(require("./lib/rate-limiter"))
-
-    // Parse the query.
+      
+    // Parse the query string into an object.
     this.__server.ext("onRequest", (request, reply) => {
       const qs = require("qs")
       const url = require("url")
@@ -113,7 +113,7 @@ class Multicolour_Server_Hapi extends Map {
   register(multicolour) {
     multicolour.set("server", this)
 
-    // Default decorator is JSON.
+    // Default decorator is plain JSON.
     this.__server.decorate("reply", "application/json", function(payload) {
       return this.response(payload)
     })
@@ -286,18 +286,22 @@ class Multicolour_Server_Hapi extends Map {
     multicolour.trigger("server_stopping")
 
     // Stop the server.
-    return new Promise(resolve => {
-      this.__server.stop(() => {
+    return this.__server.stop()
+      .then(() => {
         /* eslint-disable */
         console.log(`Server stopped running at: ${this.__server.select("multicolour-server-hapi").info.uri}`)
         /* eslint-enable */
 
         // Tell any listeners the server has stopped.
         multicolour.trigger("server_stopped")
-
-        resolve()
       })
-    })
+      .catch(error => {
+        // Tell any listeners the server has stopped.
+        multicolour.trigger("server_stopped")
+
+        // Throw the error.
+        throw error
+      })
   }
 }
 
