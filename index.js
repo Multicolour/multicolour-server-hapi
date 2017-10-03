@@ -64,6 +64,9 @@ class Multicolour_Server_Hapi extends Map {
       // Register the handlers.
       .use(require("./lib/handlers"))
 
+      // Register the rate limiter.
+      .use(require("./lib/rate-limiter"))
+
     // Parse the query.
     this.__server.ext("onRequest", (request, reply) => {
       const qs = require("qs")
