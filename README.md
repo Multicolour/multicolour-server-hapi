@@ -5,7 +5,18 @@
 [![Dependency Status](https://david-dm.org/Multicolour/multicolour-server-hapi.svg)](https://david-dm.org/Multicolour/multicolour-server-hapi)
 
 [HapiJS][hapi] Server generator for [Multicolour][multicolour]. Comes with Hapi
-Swaggered for automatic endpoint documentation via swaggered-ui.
+
+* Swagger for automatic endpoint documentation
+* Rate limiting
+* Payload validation and documentation
+* Response validation and documentation
+* CSRF token validation
+
+#### Via `multicolour` CLI
+
+`multicolour plugin-add server-hapi`
+
+#### Via `npm` CLI
 
 `npm i --save multicolour-server-hapi`
 
@@ -29,7 +40,31 @@ const my_service = require("multicolour")
 my_service.start()
 ```
 
-### Security
+### documentation
+
+The swagger documentation is only available when the `NODE_ENV` environmental isn't equal to `production`. You can visit your APIs documentation by visiting [`http://localhost:1811/docs`](http://localhost:1811/docs)
+
+### Rate limiting
+
+To add rate limiting simply update your services `config.js` settings to include `rate_limiting`. Example:
+
+```js
+{
+  ...config,
+  settings: {
+    rate_limiting: {
+      // Rate limiter docs are here https://www.npmjs.com/package/hapi-rate-limit
+    }
+  },
+  ...config
+}
+```
+
+### Validation
+
+The plugin reads your blueprints and creates Joi payload validations and Joi response validations.
+
+### CSRF
 
 This plugin supports [CSRF tokens](https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet). You can get a token for your session by running a `GET` request on `/csrf`.
 
@@ -39,51 +74,14 @@ Enable or disable CSRF by adding `my_service.reply("csrf_enabled", Boolean)` to 
 
 ### Plugins
 
-This server has support for plugins, such as the [OAuth plugin][oauth plugin] via
- the `.use` interface.
-
-Currently, `multicolour-server-hapi` only supports the `AUTH_PLUGIN` type, to create
-an auth plugin for `multicolour-server-hapi` you need to register your plugin via
-the `.use(plugin)` function. I.E
-
-```js
-// This is the logic of our plugin.
-class My_Auth_Plugin extends Map {
-  register(Multicolour_Server_Hapi) { return this }
-
-  create_session(request, reply) {}
-  destroy_session(request, reply) {}
-
-  handlers() {
-    return new Map([
-      ["create", () => this.create_session.bind(this)],
-      ["destroy", () => this.destroy_session.bind(this)]
-    ])
-  }
-}
-
-// This is the registration signature of the plugin.
-module.exports = My_Auth_Plugin
-```
-
-In the above class definition, we can see `My_Auth_Plugin` has some interesting things:  
-
-5 methods, `register`, `handlers`, `create_session` and `destroy_session`.  
-`extends Map`, `super()`.
-
-The methods are the signature of the plugin, this shouldn't be confused with the registration signature (the `module.exports = ...`). The server plugin should call these functions to register and handle behaviour when and where it is required.
-
-The plugin `extends Map` as we need to store information on the class at runtime without
-some other complicated interface wrapping the plugin.
-
-Any plugins registered to this server won't receive the graceful shutdown message that the server does, this may change if it become and error but message propagation is a messy business.
+This server has support for plugins, such as the [OAuth plugin][oauth plugin] via the `.use` interface i.e `my_server.use(require("multicolour-hapi-oauth"))`
 
 #### HapiJS plugins/access.
 
 Access to the raw HapiJS server is possible via `server.request("raw")` which will
 return the instance of HapiJS behind the plugin.
 
-[hapi]: hapijs.com
+[hapi]: https://hapijs.com
 [multicolour]: https://github.com/Multicolour/multicolour
 [oauth plugin]: https://github.com/Multicolour/multicolour-auth-oauth
-[usedocs]: https://github.com/Multicolour/multicolour/wiki/Multicolour#use
+[usedocs]: https://getmulticolour.com/docs/0.6.3/plugins/
