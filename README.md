@@ -10,6 +10,7 @@
 
 * Swagger for automatic endpoint documentation
 * Rate limiting
+* Server side caching
 * Payload validation and documentation
 * Response validation and documentation
 * CSRF token validation
@@ -42,25 +43,32 @@ const my_service = require("multicolour")
 my_service.start()
 ```
 
-### documentation
+### API documentation
 
-The swagger documentation is only available when the `NODE_ENV` environmental isn't equal to `production`. You can visit your APIs documentation by visiting [`http://localhost:1811/docs`](http://localhost:1811/docs)
+The swagger documentation is only available when the `NODE_ENV` environmental isn't equal to `production`. You can visit your API's documentation by visiting [`http://localhost:1811/docs`](http://localhost:1811/docs). If your custom routes aren't showing up on that page you need to add the `api` tag to it in it's config.
 
 ### Rate limiting
 
 To add rate limiting simply update your services `config.js` settings to include `rate_limiting`. Example:
 
+Before rate limiting will work you need to specify a server side caching mechanism first in your server configuration, for example to add an in-memory cache
+
 ```js
 {
-  ...config,
+  api_server: {
+    cache: require("catbox-memory")
+  },
   settings: {
     rate_limiting: {
-      // Rate limiter docs are here https://www.npmjs.com/package/hapi-rate-limit
+      // Rate limiter docs are here  
+      // https://www.npmjs.com/package/hapi-rate-limit
     }
   },
   ...config
 }
 ```
+
+More documentation is available on the [Hapi website](https://hapijs.com/tutorials/caching#client)
 
 ### Validation
 

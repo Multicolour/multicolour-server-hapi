@@ -66,7 +66,7 @@ class Multicolour_Server_Hapi extends Map {
 
       // Register the rate limiter.
       .use(require("./lib/rate-limiter"))
-      
+
     // Parse the query string into an object.
     this.__server.ext("onRequest", (request, reply) => {
       const qs = require("qs")
@@ -242,9 +242,7 @@ class Multicolour_Server_Hapi extends Map {
         // Generate the routes.
         this.generate_routes()
       } catch(error) {
-        /* eslint-disable */
-        console.error(error)
-        /* eslint-enable */
+        console.error(error) // eslint-disable-line
 
         error_in_routes = true
 
@@ -254,22 +252,19 @@ class Multicolour_Server_Hapi extends Map {
 
       // Start the server.
       if (!error_in_routes) {
-        this.__server.start(err => {
-          if (err) {
-            return reject(err)
-          }
+        this.__server.start()
+          .then(() => {
+            this.debug("Hapi server started successfully.")
 
-          this.debug("Hapi server started successfully.")
+            // Tell any listeners the server has started.
+            multicolour.trigger("server_started")
 
-          // Tell any listeners the server has started.
-          multicolour.trigger("server_started")
+            // Set the server root.
+            this.set("api_root", server.info.uri)
 
-          // Set the server root.
-          this.set("api_root", server.info.uri)
-
-          // Run the callback
-          resolve(server)
-        })
+            resolve(server)
+          })
+          .catch(reject)
       }
     })
   }
