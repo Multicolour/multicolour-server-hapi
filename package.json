@@ -1,6 +1,6 @@
 {
   "name": "multicolour-server-hapi",
-  "version": "1.7.12",
+  "version": "1.7.13",
   "description": "HapiJS server generator for Multicolour",
   "main": "index.js",
   "scripts": {
@@ -36,7 +36,7 @@
     "debug": "^3.1.0",
     "hapi": "^16.6.2",
     "hapi-rate-limit": "^1.4.0",
-    "hapi-swagger": "^7.7.1",
+    "hapi-swagger": "7.7.1",
     "inert": "^4.2.1",
     "joi": "10.6.0",
     "qs": "^6.5.1",
