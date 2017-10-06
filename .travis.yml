@@ -11,12 +11,5 @@ sudo: false
 script:
   - "npm run test-coverage"
 
-before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 3
-  - cd tests/integration/server/ && ./node_modules/.bin/multicolour start
-  - sleep 5
-
 after_script:
   - "npm install coveralls@2 && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
