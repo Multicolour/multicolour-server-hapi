@@ -38,7 +38,7 @@
     "hapi-rate-limit": "^1.4.0",
     "hapi-swagger": "git+https://github.com/Multicolour/hapi-swagger.git",
     "inert": "^4.2.1",
-    "joi": "10.6.0",
+    "joi": "11.2.0",
     "qs": "^6.5.1",
     "vision": "^4.1.1",
     "waterline-joi": "^1.1.1"
