@@ -40,7 +40,7 @@
     "inert": "^4.2.1",
     "joi": "10.6.0",
     "qs": "^6.5.1",
-    "vision": "^4.1.1",
+    "vision": "^5.0.0",
     "waterline-joi": "^1.1.1"
   },
   "devDependencies": {
