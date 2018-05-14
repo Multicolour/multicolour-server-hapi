@@ -11,7 +11,7 @@
   "dependencies": {
     "joi": "^10.2.2",
     "multicolour": "^0.6.3",
-    "multicolour-server-hapi": "^1.4.0",
+    "multicolour-server-hapi": "file:../../..",
     "sails-memory": "0.10.7"
   },
   "multicolour": {

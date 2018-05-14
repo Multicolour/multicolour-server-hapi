@@ -11,15 +11,6 @@ module.exports = {
     router: { stripTrailingSlash: true }
   },
 
-  api_server: {
-    connections: {
-      routes: {
-        security: true
-      }
-    },
-    debug: { request: ["error"] }
-  },
-
   // Set up our desired database adapter (defaults to Mongo)
   db: {
     adapters: {
