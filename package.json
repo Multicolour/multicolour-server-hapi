@@ -38,7 +38,7 @@
     "hapi-rate-limit": "^2.1.2",
     "hapi-swagger": "^9.1.1",
     "inert": "^5.1.0",
-    "joi": "13.3.0",
+    "joi": "13.4.0",
     "qs": "^6.5.2",
     "vision": "^5.3.2",
     "waterline-joi": "^1.1.5"
