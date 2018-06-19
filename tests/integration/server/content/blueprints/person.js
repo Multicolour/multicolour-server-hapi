@@ -107,8 +107,6 @@ module.exports = {
     // read me at https://github.com/hapijs/joi/blob/v10.2.2/API.md
     const Joi = require("joi")
 
-    const model = this
-
     // Set up a simple route that counts examples.
     hapi_server.route({
       method: "GET",
@@ -138,11 +136,12 @@ module.exports = {
             .label("person_count")
         },
 
-        handler: async function countHandler(request, reply) {
+        handler: (request, reply) => {
           // `this` is the current model but only with
           // a full function () definition (no fat arrows)
           // on the custom_routes file.
-          return await model.count(request.url.query)
+          this.count(request.url.query)
+            .then(count => reply({count}))
         }
       }
     })

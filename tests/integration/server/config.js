@@ -15,6 +15,18 @@ module.exports = {
       "stripTrailingSlash": true
     }
   },
+  "api_server": {
+    "connections": {
+      "routes": {
+        "security": true
+      }
+    },
+    "debug": {
+      "request": [
+        "error"
+      ]
+    }
+  },
   "content": "./content",
   "db": {
     "adapters": {

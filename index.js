@@ -1,7 +1,5 @@
 "use strict"
 
-Error.stackTraceLimit = Infinity
-
 const debug = require("debug")
 
 // Get our verbs.
@@ -36,6 +34,9 @@ class Multicolour_Server_Hapi extends Map {
 
     // Configure the server with some basic security.
     this.__server = new hapi.Server(config.get("api_server"))
+
+    // Pass our config along to the server.
+    this.__server.connection(connections_config)
 
     const host = config.get("api_connections").host || "localhost"
     const port = config.get("api_connections").port || 1811
@@ -75,8 +76,8 @@ class Multicolour_Server_Hapi extends Map {
       const parsed = url.parse(uri, false)
       parsed.query = qs.parse(parsed.query)
       request.setUrl(parsed)
-      
-      return reply.continue
+
+      reply.continue()
     })
 
     return this
@@ -113,7 +114,7 @@ class Multicolour_Server_Hapi extends Map {
     multicolour.set("server", this)
 
     // Default decorator is plain JSON.
-    this.__server.decorate("toolkit", "application/json", function(payload) {
+    this.__server.decorate("reply", "application/json", function(payload) {
       return this.response(payload)
     })
   }
@@ -211,12 +212,12 @@ class Multicolour_Server_Hapi extends Map {
    * @param  {Function} in_callback to execute when finished.
    * @return {Promise} Promise in resolved state.
    */
-  async start() {
+  start() {
     // Get the host.
     const multicolour = this.request("host")
 
     // Get the server.
-    const server = this.__server
+    const server = this.__server.select("multicolour-server-hapi")
 
     // Tell any listeners the server is starting.
     multicolour.trigger("server_starting")
@@ -224,7 +225,7 @@ class Multicolour_Server_Hapi extends Map {
     // If it's not a production environment,
     // get the Swagger library and it's interface.
     if (process.env.NODE_ENV !== "production") {
-      await require("./lib/swagger-ui")(this)
+      require("./lib/swagger-ui")(this)
     }
     else {
       /* eslint-disable */
@@ -283,7 +284,7 @@ class Multicolour_Server_Hapi extends Map {
     return this.__server.stop()
       .then(() => {
         /* eslint-disable */
-        console.log(`Server stopped running at: ${this.__server.info.uri}`)
+        console.log(`Server stopped running at: ${this.__server.select("multicolour-server-hapi").info.uri}`)
         /* eslint-enable */
 
         // Tell any listeners the server has stopped.
