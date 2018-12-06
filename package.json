@@ -6,7 +6,9 @@
   "scripts": {
     "test": "tape tests/all.js | tap-spec",
     "integration-tests": "newman run tests/integration/postman_collection.json",
-    "test-coverage": "istanbul cover tape tests/all.js --recursive --report lcov html -x handlers.js | tap-spec"
+    "test-coverage": "istanbul cover tape tests/all.js --recursive --report lcov html -x handlers.js | tap-spec",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -41,7 +43,8 @@
     "joi": "10.6.0",
     "qs": "^6.5.1",
     "vision": "^4.1.1",
-    "waterline-joi": "^1.1.1"
+    "waterline-joi": "^1.1.1",
+    "snyk": "^1.115.0"
   },
   "devDependencies": {
     "eslint": "^4.8.0",
@@ -52,5 +55,6 @@
     "sails-memory": "^0.10.7",
     "tap-spec": "^4.1.1",
     "tape": "^4.8.0"
-  }
+  },
+  "snyk": true
 }
