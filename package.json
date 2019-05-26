@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@newworldcode/talkie": "^1.0.9",
-    "async": "^2.5.0",
+    "async": "^3.0.1",
     "boom": "^6.0.0",
     "chalk": "^2.1.0",
     "crumb": "^6.0.3",
