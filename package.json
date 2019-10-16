@@ -1,6 +1,6 @@
 {
   "name": "multicolour-server-hapi",
-  "version": "1.8.2",
+  "version": "1.9.2",
   "description": "HapiJS server generator for Multicolour",
   "main": "index.js",
   "scripts": {
@@ -28,29 +28,26 @@
     "node": ">= 4.6.0"
   },
   "dependencies": {
+    "@hapi/boom": "^8.0.1",
+    "@hapi/crumb": "^7.3.2",
+    "@hapi/hapi": "^18.4.0",
+    "@hapi/inert": "^5.2.2",
+    "@hapi/joi": "^16.1.7",
+    "@hapi/vision": "^5.5.4",
     "@newworldcode/talkie": "^1.0.9",
-    "async": "^2.5.0",
-    "boom": "^6.0.0",
-    "chalk": "^2.1.0",
-    "crumb": "^6.0.3",
-    "debug": "^3.1.0",
-    "hapi": "^16.6.2",
-    "hapi-rate-limit": "^1.4.0",
-    "hapi-swagger": "git+https://github.com/Multicolour/hapi-swagger.git",
-    "inert": "^4.2.1",
-    "joi": "10.6.0",
-    "qs": "^6.5.1",
-    "vision": "^4.1.1",
-    "waterline-joi": "^1.1.1"
+    "async": "^3.1.0",
+    "chalk": "^2.4.2",
+    "debug": "^4.1.1",
+    "hapi-swagger": "^10.1.2",
+    "qs": "^6.9.0",
+    "waterline-joi": "^1.1.5"
   },
   "devDependencies": {
-    "eslint": "^4.8.0",
-    "istanbul": "^0.4.5",
-    "multicolour": "^0.6.11",
+    "eslint": "^6.5.1",
+    "multicolour": "^0.6.39",
     "multicolour-seed": "0.0.6",
-    "newman": "^3.8.3",
-    "sails-memory": "^0.10.7",
-    "tap-spec": "^4.1.1",
-    "tape": "^4.8.0"
+    "newman": "^4.5.5",
+    "tap-spec": "^5.0.0",
+    "tape": "^4.11.0"
   }
 }

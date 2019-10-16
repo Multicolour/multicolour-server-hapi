@@ -21,25 +21,13 @@ class Multicolour_Server_Hapi extends Map {
     this.debug = debug("multicolour:server-hapi")
 
     // Get Hapi.
-    const hapi = require("hapi")
+    const hapi = require("@hapi/hapi")
     const config = this.request("host").get("config")
-    const connections_config = config.get("api_connections")
-
-    // Create a default label for us to use internally.
-    // Check the labels array exists first though.
-    if (!connections_config.hasOwnProperty("labels"))
-      connections_config.labels = []
-
-    connections_config.labels.push("multicolour-server-hapi")
+    const server_config = config.get("api_server")
+    const host = server_config.host || "0.0.0.0"
 
     // Configure the server with some basic security.
-    this.__server = new hapi.Server(config.get("api_server"))
-
-    // Pass our config along to the server.
-    this.__server.connection(connections_config)
-
-    const host = config.get("api_connections").host || "localhost"
-    const port = config.get("api_connections").port || 1811
+    this.__server = new hapi.Server(server_config)
 
     this
       .reply("raw", () => this.__server)
@@ -47,7 +35,7 @@ class Multicolour_Server_Hapi extends Map {
       // Set some defaults.
       .reply("csrf_enabled", false)
       .set("did_generate_routes", false)
-      .set("api_root", `http://${host}:${port}`)
+      .set("api_root", `http://${host}:${server_config.port}`)
 
     // Check there's an auth config available.
     if (typeof this.request("auth_config") === "undefined") {
@@ -64,8 +52,8 @@ class Multicolour_Server_Hapi extends Map {
       // Register the handlers.
       .use(require("./lib/handlers"))
 
-      // Register the rate limiter.
-      // .use(require("./lib/rate-limiter"))
+    // Register the rate limiter.
+    // .use(require("./lib/rate-limiter"))
 
     // Parse the query string into an object.
     this.__server.ext("onRequest", (request, reply) => {
@@ -112,11 +100,6 @@ class Multicolour_Server_Hapi extends Map {
    */
   register(multicolour) {
     multicolour.set("server", this)
-
-    // Default decorator is plain JSON.
-    this.__server.decorate("reply", "application/json", function(payload) {
-      return this.response(payload)
-    })
   }
 
   /**
@@ -150,6 +133,7 @@ class Multicolour_Server_Hapi extends Map {
     for (const model_name in models) {
       // Make the below easier to read.
       const model = models[model_name]
+      model.model_name = model_name
 
       // Create the stuff we'll need.
       const get_route = new Verb_Get(this, model)
@@ -216,9 +200,6 @@ class Multicolour_Server_Hapi extends Map {
     // Get the host.
     const multicolour = this.request("host")
 
-    // Get the server.
-    const server = this.__server.select("multicolour-server-hapi")
-
     // Tell any listeners the server is starting.
     multicolour.trigger("server_starting")
 
@@ -283,9 +264,7 @@ class Multicolour_Server_Hapi extends Map {
     // Stop the server.
     return this.__server.stop()
       .then(() => {
-        /* eslint-disable */
-        console.log(`Server stopped running at: ${this.__server.select("multicolour-server-hapi").info.uri}`)
-        /* eslint-enable */
+        console.log("Server stopped running")
 
         // Tell any listeners the server has stopped.
         multicolour.trigger("server_stopped")
