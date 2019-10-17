@@ -56,7 +56,7 @@ class Multicolour_Server_Hapi extends Map {
     // .use(require("./lib/rate-limiter"))
 
     // Parse the query string into an object.
-    this.__server.ext("onRequest", (request, reply) => {
+    /*this.__server.ext("onRequest", (request, reply) => {
       const qs = require("qs")
       const url = require("url")
 
@@ -66,7 +66,7 @@ class Multicolour_Server_Hapi extends Map {
       request.setUrl(parsed)
 
       reply.continue()
-    })
+    })*/
 
     return this
   }
@@ -149,23 +149,12 @@ class Multicolour_Server_Hapi extends Map {
       // Create routes if we didn't specifically say not to
       // and this model isn't a junction table.
       if (!model.NO_AUTO_GEN_ROUTES && !model.meta.junctionTable) {
-        if (model.$_endpoint_class) {
-          // Add the standard routes.
-          if (model.GET) routes.push(get_route.get_route())
-          if (model.POST) routes.push(post_route.get_route())
-          if (model.PATCH) routes.push(patch_route.get_route())
-          if (model.DELETE) routes.push(delete_route.get_route())
-          if (model.PUT) routes.push(put_route.get_route())
-        }
-        else {
-          routes = [
-            get_route.get_route(),
-            post_route.get_route(),
-            patch_route.get_route(),
-            delete_route.get_route(),
-            put_route.get_route()
-          ]
-        }
+        // Add the standard routes.
+        if (model.GET !== "undefined" && model.GET) routes.push(get_route.get_route())
+        if (model.POST !== "undefined" && model.POST) routes.push(post_route.get_route())
+        if (model.PATCH !== "undefined" && model.PATCH) routes.push(patch_route.get_route())
+        if (model.DELETE !== "undefined" && model.DELETE) routes.push(delete_route.get_route())
+        if (model.PUT !== "undefined" && model.PUT) routes.push(put_route.get_route())
 
         // If this model specifies it can upload files,
         // add the route required.
@@ -196,7 +185,7 @@ class Multicolour_Server_Hapi extends Map {
    * @param  {Function} in_callback to execute when finished.
    * @return {Promise} Promise in resolved state.
    */
-  start() {
+  async start() {
     // Get the host.
     const multicolour = this.request("host")
 
@@ -206,13 +195,13 @@ class Multicolour_Server_Hapi extends Map {
     // If it's not a production environment,
     // get the Swagger library and it's interface.
     if (process.env.NODE_ENV !== "production") {
-      require("./lib/swagger-ui")(this)
+      await require("./lib/swagger-ui")(this)
     }
     else {
-      /* eslint-disable */
+      /* eslint-disable no-console */
       /* istanbul ignore next : Not testable */
       console.log("PROD: Not setting up /docs in production.")
-      /* eslint-enable */
+      /* eslint-enable no-console */
     }
 
     // Start the server.
@@ -223,7 +212,7 @@ class Multicolour_Server_Hapi extends Map {
         // Generate the routes.
         this.generate_routes()
       } catch(error) {
-        console.error(error) // eslint-disable-line
+        console.error(error) // eslint-disable-line no-console
 
         error_in_routes = true
 
@@ -240,10 +229,7 @@ class Multicolour_Server_Hapi extends Map {
             // Tell any listeners the server has started.
             multicolour.trigger("server_started")
 
-            // Set the server root.
-            this.set("api_root", server.info.uri)
-
-            resolve(server)
+            resolve(this)
           })
           .catch(reject)
       }
