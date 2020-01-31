@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "eslint": "^6.5.1",
-    "multicolour": "^0.6.39",
+    "multicolour": "^0.6.44",
     "multicolour-seed": "0.0.6",
     "newman": "^4.5.5",
     "tap-spec": "^5.0.0",
